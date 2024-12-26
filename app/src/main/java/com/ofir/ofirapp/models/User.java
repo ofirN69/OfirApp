@@ -1,4 +1,4 @@
-package com.ofir.ofirapp.model;
+package com.ofir.ofirapp.models;
 
 public class User {
     String id;
@@ -23,8 +23,6 @@ public class User {
 
     }
 
-    public User() {
-    }
 
     @Override
     public String toString() {
@@ -94,5 +92,8 @@ public class User {
     public void setCity(String city) {
         this.city = city;
     }
+
+
 }
+
 

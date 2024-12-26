@@ -24,15 +24,16 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.ofir.ofirapp.services.AuthenticationService;
+import com.ofir.ofirapp.services.DatabaseService;
 
 public class Login extends AppCompatActivity implements View.OnClickListener {
 
     EditText etEmail, etPassword;
     Button btnLog;
     String email, pass;
-    FirebaseDatabase database;
-    DatabaseReference myRef;
-    private FirebaseAuth mAuth;
+    private AuthenticationService authenticationService;
+    private DatabaseService databaseService;
 
     public static final String MyPREFERENCES = "MyPrefs" ;
 
@@ -49,7 +50,10 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
+        /// get the instance of the authentication service
+        authenticationService = AuthenticationService.getInstance();
+        /// get the instance of the database service
+        databaseService = DatabaseService.getInstance();
 
         initViews();
         sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
@@ -68,9 +72,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         btnLog.setOnClickListener(this);
 
 
-        mAuth = FirebaseAuth.getInstance();
-        database=FirebaseDatabase.getInstance();
-        myRef=database.getReference("Users");
+
 
     }
     @Override

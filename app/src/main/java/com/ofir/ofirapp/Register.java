@@ -27,7 +27,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.ofir.ofirapp.model.User;
+import com.ofir.ofirapp.models.User;
 
 
 public class Register extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
