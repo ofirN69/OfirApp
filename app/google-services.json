@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "997199348653",
+    "firebase_url": "https://ofirnewapp22-default-rtdb.firebaseio.com",
+    "project_id": "ofirnewapp22",
+    "storage_bucket": "ofirnewapp22.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:997199348653:android:5da53ed3ee9e92c6751724",
+        "android_client_info": {
+          "package_name": "com.ofir.ofirapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-Su5Au2xX7rZYI7ENygZXujgDHqbKuGE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="cityArr">
+        <item> "בחר עיר"</item>
+        <item>באר שבע</item>
+        <item>בית שאן</item>
+        <item>בית שמש</item>
+        <item>הוד השרון</item>
+        <item>הרצליה</item>
+        <item>חדרה</item>
+        <item>חולון</item>
+        <item>חיפה</item>
+        <item>טבריה</item>
+        <item>יפו</item>
+        <item>ירושלים</item>
+        <item>כפר סבא</item>
+        <item>לוד</item>
+        <item>נתניה</item>
+        <item>נצרת</item>
+        <item>נתיבות</item>
+        <item>עכו</item>
+        <item>פתח תקווה</item>
+        <item>צפת</item>
+        <item>קצרין</item>
+        <item>קריית גת</item>
+        <item>קריית שמונה</item>
+        <item>תל אביב-יפו</item>
+        <item>רמת גן</item>
+        <item>רמת השרון</item>
+        <item>ראשון לציון</item>
+        <item>רעננה</item>
+        <item>שדרות</item>
+        <item>אשקלון</item>
+        <item>אשדוד</item>
+        <item>עפולה</item>
+        <item>עזריה</item>
+        <item>מודיעין</item>
+        <item>רחובות</item>
+        <item>זכרון יעקב</item>
+        <item>הוד השרון</item>
+        <item>תל אביב</item>
+        <item>חולון</item>
+        <item>פ"ת</item>
+        <item>נהריה</item>
+        <item>ירוחם</item>
+        <item>קריית אונו</item>
+
+    </string-array>
+
+</resources>
+

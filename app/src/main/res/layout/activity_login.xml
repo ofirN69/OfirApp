@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Login">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="התחברות"
+        android:textAlignment="center"
+        android:textSize="50dp"
+        android:textStyle="bold"
+        tools:layout_editor_absoluteX="98dp"
+        tools:layout_editor_absoluteY="160dp" />
+
+    <Button
+        android:id="@+id/btnLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#0F1010"
+        android:onClick="SignIn"
+        android:text="התחבר"
+        android:textColor="@color/white"
+        tools:layout_editor_absoluteX="160dp"
+        tools:layout_editor_absoluteY="66dp" />
+
+    <EditText
+        android:id="@+id/etEmailLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="אימייל"
+        android:inputType="textEmailAddress"
+        tools:layout_editor_absoluteX="104dp"
+        tools:layout_editor_absoluteY="279dp" />
+
+    <EditText
+        android:id="@+id/etPasswordLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="סיסמא"
+        android:inputType="textPassword" />
+
+    <Button
+        android:id="@+id/etReturn"
+        android:layout_width="80dp"
+        android:layout_height="50dp"
+        android:onClick="onClick"
+        android:text="↩"
+        android:textSize="27dp"
+        tools:layout_editor_absoluteY="680dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
