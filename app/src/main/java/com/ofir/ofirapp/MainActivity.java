@@ -11,6 +11,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.ofir.ofirapp.screens.AccPage;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     Button btnRegister,btnLogin,btnAbout;
 
@@ -39,18 +41,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        if (v==btnRegister){
+        if (v == btnRegister) {
 
 
-
-
-
-            Intent goReg=new Intent(getApplicationContext(), Register.class);
+            Intent goReg = new Intent(getApplicationContext(), Register.class);
             startActivity(goReg);
         }
-        if (v==btnLogin){
-            Intent golog=new Intent(getApplicationContext(), Login.class);
+        if (v == btnLogin) {
+            Intent golog = new Intent(getApplicationContext(), login.class);
             startActivity(golog);
         }
+        if (v == btnAbout) {
+            Intent goRe = new Intent(getApplicationContext(), AccPage.class);
+            startActivity(goRe);
+        }
+
+
     }
 }

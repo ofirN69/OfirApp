@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.androidApplication)
-    id("com.google.gms.google-com.ofir.ofirapp.services")
+    id("com.google.gms.google-services")
 }
 
 android {
