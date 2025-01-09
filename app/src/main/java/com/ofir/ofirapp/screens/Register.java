@@ -1,4 +1,4 @@
-package com.ofir.ofirapp;
+package com.ofir.ofirapp.screens;
 
 import android.content.Context;
 import android.content.Intent;
@@ -20,14 +20,11 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.ofir.ofirapp.R;
 import com.ofir.ofirapp.models.User;
+import com.ofir.ofirapp.services.AuthenticationService;
+import com.ofir.ofirapp.services.DatabaseService;
+import com.ofir.ofirapp.utils.SharedPreferencesUtil;
 
 
 public class Register extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
@@ -39,10 +36,8 @@ public class Register extends AppCompatActivity implements AdapterView.OnItemSel
     String fName, lName, phone, email, pass, city;
     Spinner spCity;
 
-    private FirebaseAuth mAuth;
-    private DatabaseReference myRef;
-    public static final String MyPREFERENCES = "MyPrefs";
-    SharedPreferences sharedpreferences;
+    AuthenticationService authenticationService;
+    DatabaseService databaseService;
 
 
     @Override
@@ -55,16 +50,10 @@ public class Register extends AppCompatActivity implements AdapterView.OnItemSel
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
-        sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
         init_views();
 
-
-        // Write a message to the database
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        myRef = database.getReference("Users");
-
-        mAuth = FirebaseAuth.getInstance();
+        authenticationService = AuthenticationService.getInstance();
+        databaseService = DatabaseService.getInstance();
 
     }
 
@@ -117,42 +106,42 @@ public class Register extends AppCompatActivity implements AdapterView.OnItemSel
             isValid = false;
         }
 
-        if (isValid == true) {
-
-            mAuth.createUserWithEmailAndPassword(email, pass)
-                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
-                                // Sign in success, update UI with the signed-in user's information
-                                Log.d("TAG", "createUserWithEmail:success");
-                                FirebaseUser fireuser = mAuth.getCurrentUser();
-                                User newUser = new User(fireuser.getUid(), fName, lName, phone, email, pass, city);
-                                myRef.child(fireuser.getUid()).setValue(newUser);
-                                SharedPreferences.Editor editor = sharedpreferences.edit();
-
-                                editor.putString("email", email);
-                                editor.putString("password", pass);
-
-                                editor.commit();
-                                Intent goLog = new Intent(Register.this, MainActivity.class);
-                                startActivity(goLog);
-
-
-                            } else {
-                                // If sign in fails, display a message to the user.
-                                Log.w("TAG", "createUserWithEmail:failure", task.getException());
-                                Toast.makeText(Register.this, "Authentication failed.",
-                                        Toast.LENGTH_SHORT).show();
-
-                            }
-
-                            // ...
-                        }
-                    });
+        if (isValid == false) {
+            return;
         }
+        authenticationService.signUp(email, pass, new AuthenticationService.AuthCallback<String>() {
+            @Override
+            public void onCompleted(String uid) {
+                // Sign in success, update UI with the signed-in user's information
+                Log.d("TAG", "createUserWithEmail:success");
+                User newUser = new User(uid, fName, lName, phone, email, pass, city);
+                databaseService.createNewUser(newUser, new DatabaseService.DatabaseCallback<Void>() {
+                    @Override
+                    public void onCompleted(Void object) {
+                        SharedPreferencesUtil.saveUser(Register.this, newUser);
+                        Intent goLog = new Intent(Register.this, MainActivity.class);
+                        startActivity(goLog);
+                    }
 
+                    @Override
+                    public void onFailed(Exception e) {
+                        // If sign in fails, display a message to the user.
+                        Log.w("TAG", "createUserWithEmail:failure", e);
+                        Toast.makeText(Register.this, "Authentication failed.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
 
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+                // If sign in fails, display a message to the user.
+                Log.w("TAG", "createUserWithEmail:failure", e);
+                Toast.makeText(Register.this, "Authentication failed.",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override

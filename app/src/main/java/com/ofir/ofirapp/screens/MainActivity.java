@@ -1,4 +1,4 @@
-package com.ofir.ofirapp;
+package com.ofir.ofirapp.screens;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,7 +11,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.ofir.ofirapp.screens.AccPage;
+import com.ofir.ofirapp.R;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     Button btnRegister,btnLogin,btnAbout;
@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        // go to landing page
         initViews();
     }
 
@@ -34,28 +35,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnRegister.setOnClickListener(this);
         btnLogin = findViewById(R.id.btnGoLogin);
         btnLogin.setOnClickListener(this);
-        btnAbout = findViewById(R.id.btnGoAbout);
-        btnAbout.setOnClickListener(this);
 
     }
 
     @Override
     public void onClick(View v) {
         if (v == btnRegister) {
-
-
             Intent goReg = new Intent(getApplicationContext(), Register.class);
             startActivity(goReg);
         }
-        if (v == btnLogin) {
-            Intent golog = new Intent(getApplicationContext(), login.class);
+
+        if (v == btnLogin){
+            Intent golog = new Intent(getApplicationContext(),LoginActivity.class);
             startActivity(golog);
         }
-        if (v == btnAbout) {
-            Intent goRe = new Intent(getApplicationContext(), AccPage.class);
-            startActivity(goRe);
-        }
-
 
     }
 }

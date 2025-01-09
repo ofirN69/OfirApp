@@ -6,64 +6,52 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#DFEAFE"
-    tools:context=".MainActivity">
+    tools:context=".screens.MainActivity">
+
 
     <Button
         android:id="@+id/btnGoRegister"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="15dp"
-        android:background="#0F1010"
-        android:text="הרשם"
+        android:layout_width="337dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="34dp"
+        android:layout_marginEnd="34dp"
+        android:layout_marginBottom="32dp"
+        android:backgroundTint="#7BA3F6"
         android:onClick="goReg"
+        android:text="הרשם"
         android:textColor="@color/white"
         android:textSize="19.5dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/btnGoLogin"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnGoLogin"
-        app:layout_constraintTop_toBottomOf="@+id/btnGoAbout" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
 
     <Button
         android:id="@+id/btnGoLogin"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="36dp"
-        android:layout_marginBottom="16dp"
-        android:background="#0F1010"
+        android:layout_width="330dp"
+        android:layout_height="57dp"
+        android:layout_marginStart="34dp"
+        android:layout_marginEnd="34dp"
+        android:layout_marginBottom="324dp"
+        android:backgroundTint="#7BA3F6"
         android:text="התחבר"
         android:textColor="@color/white"
         android:textSize="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnGoRegister"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
-
-    <Button
-        android:id="@+id/btnGoAbout"
-        android:layout_width="189dp"
-        android:layout_height="191dp"
-        android:layout_marginBottom="138dp"
-        android:background="#A3C1FF"
-        android:drawableLeft="@drawable/icons8_android_user_24"
-        android:text="עמוד המשתמש"
-        android:textColor="@color/white"
-        android:textSize="20dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnGoRegister"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
+        app:layout_constraintHorizontal_bias="0.461"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="63dp"
-        android:layout_marginBottom="555dp"
+        android:layout_width="151dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="79dp"
+        android:layout_marginBottom="80dp"
+        android:drawableLeft="@drawable/house3"
         android:text="מסך בית "
         android:textSize="30dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnGoLogin"
+        app:layout_constraintBottom_toTopOf="@+id/btnGoRegister"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

@@ -3,9 +3,9 @@ package com.ofir.ofirapp.screens;
 import android.os.Bundle;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.ofir.ofirapp.R;
+import com.ofir.ofirapp.models.User;
+import com.ofir.ofirapp.utils.SharedPreferencesUtil;
 
 public class AccPage extends AppCompatActivity {
     @Override
@@ -18,13 +18,13 @@ public class AccPage extends AppCompatActivity {
         TextView tvDisplayName = findViewById(R.id.tvDisplayName);
 
         // קבלת המשתמש המחובר
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        User user = SharedPreferencesUtil.getUser(getApplicationContext());
 
         if (user != null) {
             // הצגת פרטי המשתמש
             tvEmail.setText("Email: " + user.getEmail());
-            tvPhone.setText("Phone: " + (user.getPhoneNumber() != null ? user.getPhoneNumber() : "N/A"));
-            tvDisplayName.setText("Name: " + (user.getDisplayName() != null ? user.getDisplayName() : "N/A"));
+            tvPhone.setText("Phone: " + (user.getPhone() != null ? user.getPhone() : "N/A"));
+            tvDisplayName.setText("Name: " + (user.getFname() != null ? user.getFname() : "N/A"));
         } else {
             tvEmail.setText("User not logged in");
         }

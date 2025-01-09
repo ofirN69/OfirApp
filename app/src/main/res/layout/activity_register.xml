@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Register">
+    tools:context=".screens.Register">
 
     <TextView
         android:id="@+id/text"
@@ -106,7 +106,7 @@
         android:layout_height="0dp"
         android:layout_marginEnd="131dp"
         android:layout_marginBottom="42dp"
-        android:background="#0F1010"
+        android:backgroundTint="#7BA3F6"
 
         android:onClick="onClick"
         android:text="הרשם"
@@ -127,8 +127,8 @@
         android:layout_height="0dp"
         android:layout_marginEnd="52dp"
         android:layout_marginBottom="1dp"
+        android:backgroundTint="#7BA3F6"
         android:onClick="Main"
-        android:text="↩"
         android:textSize="28dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btnReg"
