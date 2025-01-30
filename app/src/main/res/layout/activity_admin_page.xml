@@ -11,6 +11,7 @@
 
     <TextView
         android:id="@+id/tv_hello"
+        android:text="Admin PAGE"
         android:layout_width="162dp"
         android:layout_height="0dp"
         android:layout_marginTop="34dp"

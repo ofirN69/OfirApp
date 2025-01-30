@@ -13,7 +13,12 @@ import com.ofir.ofirapp.models.User;
 import java.util.ArrayList;
 import java.util.List;
 
+/// a service to interact with the Firebase Realtime Database.
+/// this class is a singleton, use getInstance() to get an instance of this class
+/// @see #getInstance()
+/// @see FirebaseDatabase
 public class DatabaseService {
+
     /// tag for logging
     /// @see Log
     private static final String TAG = "DatabaseService";
@@ -129,20 +134,22 @@ public class DatabaseService {
     /// @see DatabaseCallback
     /// @see User
     public void createNewUser(@NotNull final User user, @Nullable final DatabaseCallback<Void> callback) {
-        writeData("users/" + user.getId(), user, callback);
+        writeData("Users/" + user.getId(), user, callback);
     }
 
-    /// create a new food in the database
-    /// @param food the food object to create
+    /// create a new event in the database
+    /// @param event the event object to create
     /// @param callback the callback to call when the operation is completed
     ///              the callback will receive void
     ///             if the operation fails, the callback will receive an exception
     /// @return void
     /// @see DatabaseCallback
-    /// @see Food
+    /// @see Event
     public void createNewEvent(@NotNull final Event event, @Nullable final DatabaseCallback<Void> callback) {
-        writeData("foods/" + event.getId(), event, callback);
+        writeData("events/" + event.getId(), event, callback);
     }
+
+
 
 
     /// get a user from the database
@@ -157,25 +164,28 @@ public class DatabaseService {
         getData("users/" + uid, User.class, callback);
     }
 
-    /// get a food from the database
-    /// @param foodId the id of the food to get
+
+
+    /// get a event from the database
+    /// @param eventId the id of the event to get
     /// @param callback the callback to call when the operation is completed
-    ///               the callback will receive the food object
+    ///               the callback will receive the event object
     ///              if the operation fails, the callback will receive an exception
     /// @return void
     /// @see DatabaseCallback
-    /// @see Food
-    public void getFood(@NotNull final String foodId, @NotNull final DatabaseCallback<Event> callback) {
-        getData("foods/" + foodId, Event.class, callback);
+    /// @see Event
+    public void getEvent(@NotNull final String eventId, @NotNull final DatabaseCallback<Event> callback) {
+        getData("events/" + eventId, Event.class, callback);
     }
 
 
-    /// generate a new id for a new food in the database
-    /// @return a new id for the food
+
+    /// generate a new id for a new event in the database
+    /// @return a new id for the event
     /// @see #generateNewId(String)
-    /// @see Food
-    public String generateFoodId() {
-        return generateNewId("foods");
+    /// @see Event
+    public String generateEventId() {
+        return generateNewId("events");
     }
 
     /// generate a new id for a new cart in the database
@@ -186,31 +196,59 @@ public class DatabaseService {
         return generateNewId("carts");
     }
 
-    /// get all the foods from the database
+    /// get all the events from the database
     /// @param callback the callback to call when the operation is completed
-    ///              the callback will receive a list of food objects
+    ///              the callback will receive a list of event objects
     ///            if the operation fails, the callback will receive an exception
     /// @return void
     /// @see DatabaseCallback
     /// @see List
-    /// @see Food
+    /// @see Event
     /// @see #getData(String, Class, DatabaseCallback)
-    public void getFoods(@NotNull final DatabaseCallback<List<Event>> callback) {
-        readData("foods").get().addOnCompleteListener(task -> {
+    public void getEvents(@NotNull final DatabaseCallback<List<Event>> callback) {
+        readData("events").get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e(TAG, "Error getting data", task.getException());
                 callback.onFailed(task.getException());
                 return;
             }
-            List<Event> foods = new ArrayList<>();
+            List<Event> events = new ArrayList<>();
             task.getResult().getChildren().forEach(dataSnapshot -> {
-                Event food = dataSnapshot.getValue(Event.class);
-                Log.d(TAG, "Got food: " + food);
-                foods.add(food);
+                Event event = dataSnapshot.getValue(Event.class);
+                Log.d(TAG, "Got event: " + event);
+                events.add(event);
             });
 
-            callback.onCompleted(foods);
+            callback.onCompleted(events);
+        });
+    }
+
+    /// get all the users from the database
+    /// @param callback the callback to call when the operation is completed
+    ///              the callback will receive a list of event objects
+    ///            if the operation fails, the callback will receive an exception
+    /// @return void
+    /// @see DatabaseCallback
+    /// @see List
+    /// @see Event
+    /// @see #getData(String, Class, DatabaseCallback)
+    public void getUsers(@NotNull final DatabaseCallback<List<User>> callback) {
+        readData("Users").get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.e(TAG, "Error getting data", task.getException());
+                callback.onFailed(task.getException());
+                return;
+            }
+            List<User> users = new ArrayList<>();
+            task.getResult().getChildren().forEach(dataSnapshot -> {
+                User user = dataSnapshot.getValue(User.class);
+                Log.d(TAG, "Got user: " + user);
+                users.add(user);
+            });
+
+            callback.onCompleted(users);
         });
     }
 
 }
+

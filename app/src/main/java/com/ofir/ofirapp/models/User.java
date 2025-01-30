@@ -2,27 +2,21 @@ package com.ofir.ofirapp.models;
 
 public class User {
     String id;
-    String fname, lname, phone,email, password, city;
+    String fname, lname, phone,email, password;
 
-    public User(String id, String fname, String lname, String phone, String email, String password, String city) {
+    public User(String id, String fname, String lname, String phone, String email, String password) {
         this.id = id;
         this.fname = fname;
         this.lname = lname;
         this.phone = phone;
         this.email = email;
         this.password = password;
-        this.city =city;
-    }
-    public User(String id, String fname, String lname, String phone, String email, String city) {
-        this.id = id;
-        this.fname = fname;
-        this.lname = lname;
-        this.phone = phone;
-        this.email = email;
-        this.city =city;
 
     }
 
+
+    public User() {
+    }
 
     @Override
     public String toString() {
@@ -33,7 +27,7 @@ public class User {
                 ", phone='" + phone + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
-                ", city='" + city + '\'' +
+
                 '}';
     }
 
@@ -85,13 +79,7 @@ public class User {
         return password;
     }
 
-    public String getCity() {
-        return city;
-    }
 
-    public void setCity(String city) {
-        this.city = city;
-    }
 
 
 }

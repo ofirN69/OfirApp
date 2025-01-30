@@ -30,11 +30,13 @@ import com.ofir.ofirapp.utils.SharedPreferencesUtil;
 public class Register extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
 
+
+
+    private static final String TAG = "RegisterActivity";
     EditText etFName, etLName, etPhone, etEmail, etPass;
     Button btnReg;
 
-    String fName, lName, phone, email, pass, city;
-    Spinner spCity;
+    String fName, lName, phone, email, pass;
 
     AuthenticationService authenticationService;
     DatabaseService databaseService;
@@ -64,8 +66,6 @@ public class Register extends AppCompatActivity implements AdapterView.OnItemSel
         etPhone = findViewById(R.id.etPhone);
         etEmail = findViewById(R.id.etEmail);
         etPass = findViewById(R.id.etPassword);
-        spCity = findViewById(R.id.spCity);
-        spCity.setOnItemSelectedListener(this);
 
     }
 
@@ -114,13 +114,29 @@ public class Register extends AppCompatActivity implements AdapterView.OnItemSel
             public void onCompleted(String uid) {
                 // Sign in success, update UI with the signed-in user's information
                 Log.d("TAG", "createUserWithEmail:success");
-                User newUser = new User(uid, fName, lName, phone, email, pass, city);
+                User newUser = new User(uid, fName, lName, phone, email, pass);
                 databaseService.createNewUser(newUser, new DatabaseService.DatabaseCallback<Void>() {
                     @Override
                     public void onCompleted(Void object) {
+
+
+
+                        Log.d(TAG, "onCompleted: User registered successfully");
+                        /// save the user to shared preferences
+
                         SharedPreferencesUtil.saveUser(Register.this, newUser);
-                        Intent goLog = new Intent(Register.this, MainActivity.class);
-                        startActivity(goLog);
+
+
+
+                        Log.d(TAG, "onCompleted: Redirecting to MainActivity");
+                        /// Redirect to MainActivity and clear back stack to prevent user from going back to register screen
+                        Intent mainIntent = new Intent(Register.this, MainActivity.class);
+                        /// clear the back stack (clear history) and start the MainActivity
+                        mainIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(mainIntent);
+
+
+                        startActivity(mainIntent);
                     }
 
                     @Override

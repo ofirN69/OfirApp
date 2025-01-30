@@ -1,12 +1,13 @@
 package com.ofir.ofirapp.screens;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -21,22 +22,33 @@ import com.ofir.ofirapp.utils.Validator;
 
 
 
- class LoginActivity extends AppCompatActivity implements View.OnClickListener {
+public class Login extends AppCompatActivity implements View.OnClickListener,AuthenticationService.AuthCallback<String> {
 
-    private static final String TAG = "LoginActivity";
+
+
+    private static final String TAG = "Login";
 
     private EditText etEmail, etPassword;
-    private Button btnLogin;
+    private Button btnGoLog;
 
     private AuthenticationService authenticationService;
     private DatabaseService databaseService;
+    private User user=null;
+
+    String admin = "ofiry.nevo555@gmail.com";
+    String passadmin = "123456";
+
+
+    public static boolean isAdmin = false;
+    private String email;
+    private String password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         /// set the layout for the activity
-        setContentView(R.layout.activity_login2);
+        setContentView(R.layout.activity_login);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -48,23 +60,36 @@ import com.ofir.ofirapp.utils.Validator;
         /// get the instance of the database service
         databaseService = DatabaseService.getInstance();
 
-        /// get the views
-        etEmail = findViewById(R.id.etEmail);
-        etPassword = findViewById(R.id.etPassword);
-        btnLogin = findViewById(R.id.btnLog);
 
+        user = SharedPreferencesUtil.getUser(Login.this);
+        /// get the views
+        etEmail = findViewById(R.id.etEmailLogin);
+
+
+        etPassword = findViewById(R.id.etPasswordLogin);
+
+
+        btnGoLog = findViewById(R.id.btnLog);
+        btnGoLog.setOnClickListener(this);
+        if (user != null)
+        {
+            etEmail.setText(user.getEmail());
+            etPassword.setText(user.getPassword());
+          }
         /// set the click listener
-        btnLogin.setOnClickListener(this);
+
     }
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == btnLogin.getId()) {
+        if (v.getId() == btnGoLog.getId()) {
             Log.d(TAG, "onClick: Login button clicked");
 
+
+
             /// get the email and password entered by the user
-            String email = etEmail.getText().toString();
-            String password = etPassword.getText().toString();
+             email = etEmail.getText().toString();
+             password = etPassword.getText().toString();
 
             /// log the email and password
             Log.d(TAG, "onClick: Email: " + email);
@@ -82,7 +107,26 @@ import com.ofir.ofirapp.utils.Validator;
             /// Login user
             loginUser(email, password);
         }
+
     }
+    @Override
+    public void onCompleted(String id) {
+        Log.d("TAG", "signInWithEmail:success");
+        if (etEmail.equals(admin) && etPassword.equals(passadmin)) {
+            Intent golog = new Intent(getApplicationContext(), AdminPage.class);
+            isAdmin = true;
+            startActivity(golog);
+        } else {
+            Intent go = new Intent(getApplicationContext(), AfterLogPage.class);
+            startActivity(go);
+        }
+    }
+
+    @Override
+    public void onFailed(Exception e) {
+
+    }
+
 
     /// Method to check if the input is valid
     /// It checks if the email and password are valid
@@ -123,12 +167,22 @@ import com.ofir.ofirapp.utils.Validator;
                     public void onCompleted(User user) {
                         Log.d(TAG, "onCompleted: User data retrieved successfully");
                         /// save the user data to shared preferences
-                        SharedPreferencesUtil.saveUser(LoginActivity.this, user);
+                        SharedPreferencesUtil.saveUser(Login.this, user);
                         /// Redirect to main activity and clear back stack to prevent user from going back to login screen
-                        Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
-                        /// Clear the back stack (clear history) and start the MainActivity
-                        mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(mainIntent);
+                        if (email.equals(admin) && password.equals(passadmin)) {
+                            Intent golog = new Intent(getApplicationContext(), AdminPage.class);
+                            isAdmin = true;
+                            startActivity(golog);
+                        }
+
+
+                        else {
+                            Intent mainIntent = new Intent(Login.this, AfterLogPage.class);
+
+                            /// Clear the back stack (clear history) and start the MainActivity
+                            mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(mainIntent);
+                        }
                     }
 
                     @Override
@@ -146,17 +200,13 @@ import com.ofir.ofirapp.utils.Validator;
 
             @Override
             public void onFailed(Exception e) {
-                Log.e(TAG, "onFailed: Failed to log in user", e);
-                /// Show error message to user
-                etPassword.setError("Invalid email or password");
-                etPassword.requestFocus();
 
+                // If sign in fails, display a message to the user.
+                Log.w("TAG", "signInWithEmail:failure", e);
+                Toast.makeText(getApplicationContext(), "Authentication failed.",
+                        Toast.LENGTH_SHORT).show();
+//                                updateUI(null);
             }
         });
     }
-
-     public void move(View view) {
-         Intent goRe = new Intent(getApplicationContext(), AfterLogPage.class);
-         startActivity(goRe);
-     }
- }
+}

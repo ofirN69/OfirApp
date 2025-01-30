@@ -14,12 +14,37 @@ public class Event {
     String id;
     String type;
     String date;
-    String hour;
     String venue;
 
     String address;
+    String city;
+
+    String dresscode;
 
     String status;
+
+
+
+
+   String menutype;
+
+    ArrayList<User> users;
+
+    public Event(String id, String type, String date,  String venue, String address, String city, String dresscode, String status, String menutype, ArrayList<User> users) {
+        this.id = id;
+        this.type = type;
+        this.date = date;
+        this.venue = venue;
+        this.address = address;
+        this.city = city;
+        this.dresscode = dresscode;
+        this.status = status;
+        this.menutype = menutype;
+        this.users = users;
+    }
+
+    public Event() {
+    }
 
     public String getType() {
         return type;
@@ -37,13 +62,6 @@ public class Event {
         this.date = date;
     }
 
-    public String getHour() {
-        return hour;
-    }
-
-    public void setHour(String hour) {
-        this.hour = hour;
-    }
 
     public String getVenue() {
         return venue;
@@ -69,23 +87,51 @@ public class Event {
         this.status = status;
     }
 
-    public ArrayList<String> getMenu() {
-        return Menu;
+    public String getCity() {
+        return city;
     }
 
-    public void setMenu(ArrayList<String> menu) {
-        Menu = menu;
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getDresscode() {
+        return dresscode;
+    }
+
+    public void setDresscode(String dresscode) {
+        this.dresscode = dresscode;
+    }
+
+    public String getMenutype() {
+        return menutype;
+    }
+
+    public void setMenutype(String menutype) {
+        this.menutype = menutype;
     }
 
     public ArrayList<User> getUsers() {
-        return Users;
+        return users;
     }
 
     public void setUsers(ArrayList<User> users) {
-        Users = users;
+        this.users = users;
     }
 
-    ArrayList<String> Menu;
-
-    ArrayList<User> Users;
+    @Override
+    public String toString() {
+        return "Event{" +
+                "id='" + id + '\'' +
+                ", type='" + type + '\'' +
+                ", date='" + date + '\'' +
+                ", venue='" + venue + '\'' +
+                ", address='" + address + '\'' +
+                ", city='" + city + '\'' +
+                ", dresscode='" + dresscode + '\'' +
+                ", status='" + status + '\'' +
+                ", menutype='" + menutype + '\'' +
+                ", users=" + users +
+                '}';
+    }
 }
