@@ -164,10 +164,12 @@ public class Login extends AppCompatActivity implements View.OnClickListener,Aut
                 /// get the user data from the database
                 databaseService.getUser(uid, new DatabaseService.DatabaseCallback<User>() {
                     @Override
-                    public void onCompleted(User user) {
-                        Log.d(TAG, "onCompleted: User data retrieved successfully");
+                    public void onCompleted(User user2) {
+
+
+                        Log.d(TAG, "onCompleted: User data retrieved successfully "+user2.toString());
                         /// save the user data to shared preferences
-                        SharedPreferencesUtil.saveUser(Login.this, user);
+                       // SharedPreferencesUtil.saveUser(Login.this, user2);
                         /// Redirect to main activity and clear back stack to prevent user from going back to login screen
                         if (email.equals(admin) && password.equals(passadmin)) {
                             Intent golog = new Intent(getApplicationContext(), AdminPage.class);

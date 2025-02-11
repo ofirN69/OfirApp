@@ -23,7 +23,7 @@ public class AdminPage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_after_log_page);
+        setContentView(R.layout.activity_admin_page);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -45,5 +45,10 @@ public class AdminPage extends AppCompatActivity {
     public void Add(View view) {
         Intent goAdd = new Intent(getApplicationContext(), addEVENT.class);
         startActivity(goAdd);
+    }
+
+    public void goEvents(View view) {
+        Intent go = new Intent(getApplicationContext(), MyEvents.class);
+        startActivity(go);
     }
 }

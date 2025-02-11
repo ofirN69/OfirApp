@@ -41,4 +41,10 @@ public class AfterLogPage extends AppCompatActivity {
         startActivity(goRe);
     }
 
+
+
+    public void goMyEvents(View view) {
+        Intent goToEvents = new Intent(getApplicationContext(), MyEvents.class);
+        startActivity(goToEvents);
+    }
 }
