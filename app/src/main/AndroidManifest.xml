@@ -17,9 +17,7 @@
             android:exported="false" />
         <activity
             android:name=".screens.MyEvents"
-            android:exported="false"
-            android:label="@string/title_activity_my_events"
-            android:theme="@style/Theme.OfirApp" />
+            android:exported="false" />
         <activity
             android:name=".screens.Login"
             android:exported="false" />
