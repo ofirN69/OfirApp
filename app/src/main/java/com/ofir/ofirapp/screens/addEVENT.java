@@ -12,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -24,14 +25,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 
 import com.ofir.ofirapp.R;
+import com.ofir.ofirapp.adapters.UserNamAdapter;
 import com.ofir.ofirapp.models.Event;
 import com.ofir.ofirapp.models.User;
 import com.ofir.ofirapp.services.DatabaseService;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
-public class addEVENT extends AppCompatActivity implements View.OnClickListener {
+public class addEVENT extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener {
 
     CalendarView cvEventDate;
     Spinner spinnertype;  // Spinner for sizes
@@ -48,6 +52,25 @@ public class addEVENT extends AppCompatActivity implements View.OnClickListener 
     private DatabaseService databaseService;
     private String selectedType;
 
+
+    private String uid;
+
+    User user;
+
+    ListView lvMembers,lvSelectedMembers;
+
+
+    ArrayList<User> users=new ArrayList<>();
+    UserNamAdapter<User> adapter;
+    private UserNamAdapter<User> selectedAdapter;
+
+
+    ArrayList<User> usersSelected=new ArrayList<>();
+
+    String members="";
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +80,54 @@ public class addEVENT extends AppCompatActivity implements View.OnClickListener 
 
         initViews();
         btnAddEvent.setOnClickListener(this);
+
+
+        users = new ArrayList<>();
+        adapter = new UserNamAdapter<>(addEVENT.this, 0, 0, users);
+        lvMembers.setAdapter(adapter);
+        lvMembers.setOnItemClickListener(this);
+
+        selectedAdapter = new UserNamAdapter<>(addEVENT.this, 0, 0, usersSelected);
+        lvSelectedMembers.setAdapter(selectedAdapter);
+
+        // Click listener for removing users from lvSelectedMembers
+        lvSelectedMembers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                User selectedUser = usersSelected.get(position);  // Get the clicked user
+
+                usersSelected.remove(selectedUser);  // Remove from selected list
+
+                selectedAdapter.notifyDataSetChanged();  // Refresh the selected list
+            }
+        });
+
+
+        databaseService.getUsers(new DatabaseService.DatabaseCallback<List<User>>() {
+            @Override
+            public void onCompleted(List<User> object) {
+                users.clear();
+                users.addAll(object);
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+                Log.e("TAG", "onFailed: ", e);
+            }
+        });
+
+        databaseService.getUser(uid, new DatabaseService.DatabaseCallback<User>() {
+            @Override
+            public void onCompleted(User u) {
+                user = u;
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+            }
+        });
+
     }
 
     private void initViews() {
@@ -74,6 +145,8 @@ public class addEVENT extends AppCompatActivity implements View.OnClickListener 
         rbVegan = findViewById(R.id.rbVegan);
         rbMeat = findViewById(R.id.rbMeat);
 
+        lvMembers=findViewById(R.id.lvMembers);
+        lvSelectedMembers=findViewById(R.id.lvSelected);
         // Set default date to today
         long currentDate = cvEventDate.getDate();
         java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
@@ -190,7 +263,12 @@ public class addEVENT extends AppCompatActivity implements View.OnClickListener 
                     });
                 }
             }
-        }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+    }
+}
 
 
 
