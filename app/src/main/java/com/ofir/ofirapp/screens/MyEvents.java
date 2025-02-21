@@ -1,93 +1,69 @@
 package com.ofir.ofirapp.screens;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+import android.util.Log;
 import android.widget.Toast;
-
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
-
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.ofir.ofirapp.R;
+import com.google.firebase.database.*;
 import com.ofir.ofirapp.models.Event;
+import java.util.ArrayList;
+import com.ofir.ofirapp.R;
+
 
 public class MyEvents extends AppCompatActivity {
+    private RecyclerView recyclerView;
+    private EventAdapter adapter;
+    private ArrayList<Event> eventList;
+    private DatabaseReference databaseReference;
+    private FirebaseAuth auth;
 
-    public class myEvents extends AppCompatActivity {
-        private TextView tvEventList;
-        private FirebaseDatabase database;
-        private DatabaseReference myRef;
-        Button btnBack;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_my_events);
 
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            setContentView(R.layout.activity_my_events);
+        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-            // בדיקת התחברות
-            if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-                Toast.makeText(this, "Please log in to access this feature.", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(this, Login.class);
-                startActivity(intent);
-                finish();
-                return;
-            }
+        eventList = new ArrayList<>();
+        adapter = new EventAdapter(eventList);
+        recyclerView.setAdapter(adapter);
 
-            // אתחול Firebase
-            database = FirebaseDatabase.getInstance();
-            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            myRef = database.getReference("tasks").child(userId);
+        auth = FirebaseAuth.getInstance();
+        String userId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
 
-            // אתחול TextView
-            tvEventList = findViewById(R.id.tvEventsList);
-
-            // קריאת משימות מ-Firebase
-            loadTasksFromFirebase();
+        if (userId == null) {
+            Toast.makeText(this, "שגיאה בזיהוי המשתמש", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        private void loadTasksFromFirebase() {
-            myRef.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    StringBuilder tasks = new StringBuilder();
+        databaseReference = FirebaseDatabase.getInstance().getReference("events");
 
-                    // מעבר על כל המשימות
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        Event event = snapshot.getValue(Event.class);
-                        if (event != null) {
-                            tasks.append("Event Type: ").append(event.getType()).append("\n")
-                                    .append("Venue: ").append(event.getVenue()).append("\n")
-                                    .append("city: ").append(event.getCity()).append("\n")
-                                    .append("menu type: ").append(event.getMenutype()).append("\n")
-                                    .append("Date: ").append(event.getDate()).append("\n")
-                                    .append("Dress code: ").append(event.getDresscode()).append("\n\n");
-                        }
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                eventList.clear();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    Event event = dataSnapshot.getValue(Event.class);
+                    if (event != null && event.getId() != null) {
+                        eventList.add(event);
                     }
-
-                    // עדכון הטקסט בתצוגה
-                    tvEventList.setText(tasks.length() > 0 ? tasks.toString() : "No tasks available.");
                 }
+                adapter.notifyDataSetChanged();
+                Toast.makeText(MyEvents.this, "אירועים נטענו: " + eventList.size(), Toast.LENGTH_SHORT).show();
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    Toast.makeText(MyEvents.this, "Failed to load tasks.", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
 
-        public void MainActivity(View view) {
-            if (view == btnBack) {
-                Intent btnBack = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(btnBack);
             }
-        }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(MyEvents.this, "שגיאה בטעינת הנתונים", Toast.LENGTH_SHORT).show();
+
+            }
+        });
     }
 }
