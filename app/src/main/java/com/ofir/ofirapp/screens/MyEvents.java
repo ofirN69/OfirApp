@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -26,7 +27,7 @@ public class MyEvents extends AppCompatActivity {
     private EventAdapter eventAdapter;
     private ArrayList<Event> eventList;
     private DatabaseReference databaseReference;
-    private String userId = "YOUR_USER_ID"; // Replace this with the actual user ID
+    private String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,19 +42,23 @@ public class MyEvents extends AppCompatActivity {
         recyclerView.setAdapter(eventAdapter);
 
         databaseReference = FirebaseDatabase.getInstance().getReference("events");
+        userId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // Get the logged-in user's ID
 
         loadUserEvents();
     }
 
     private void loadUserEvents() {
-        databaseReference.orderByChild("events/" + userId).equalTo(true).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 eventList.clear();
                 for (DataSnapshot eventSnapshot : snapshot.getChildren()) {
                     Event event = eventSnapshot.getValue(Event.class);
                     if (event != null) {
-                        eventList.add(event);
+                        // ✅ Check if the user is the creator OR is in the invited list
+                        if (event.getCreatedBy().equals(userId) || isUserInvited(event)) {
+                            eventList.add(event);
+                        }
                     }
                 }
                 eventAdapter.notifyDataSetChanged();
@@ -65,5 +70,15 @@ public class MyEvents extends AppCompatActivity {
                 Log.e("Firebase", "Error loading events", error.toException());
             }
         });
+    }
+
+    private boolean isUserInvited(Event event) {
+        if (event.getInvitedUsers() == null) return false;
+        for (String invitedUserId : event.getInvitedUsers()) {
+            if (invitedUserId.equals(userId)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

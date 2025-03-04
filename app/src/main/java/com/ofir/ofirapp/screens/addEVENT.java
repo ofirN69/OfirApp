@@ -103,6 +103,7 @@ public class addEVENT extends AppCompatActivity implements View.OnClickListener,
         });
 
 
+
         databaseService.getUsers(new DatabaseService.DatabaseCallback<List<User>>() {
             @Override
             public void onCompleted(List<User> object) {
@@ -248,8 +249,6 @@ public class addEVENT extends AppCompatActivity implements View.OnClickListener,
                             Toast.makeText(addEVENT.this, "Item added successfully", Toast.LENGTH_SHORT).show();
                             Intent goReg = new Intent(addEVENT.this, AfterLogPage.class);
                             startActivity(goReg);
-
-
 
                         }
 
