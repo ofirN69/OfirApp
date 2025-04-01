@@ -84,6 +84,8 @@ public class addEVENT extends AppCompatActivity implements View.OnClickListener,
 
         users = new ArrayList<>();
         adapter = new UserNamAdapter<>(addEVENT.this, 0, 0, users);
+
+
         lvMembers.setAdapter(adapter);
         lvMembers.setOnItemClickListener(this);
 
@@ -239,7 +241,7 @@ public class addEVENT extends AppCompatActivity implements View.OnClickListener,
 
                 //  public Event(String type, String date, String hour, String venue, String address, String city, String dresscode, String status, ArrayList < String > menutype, ArrayList < User > users)
 
-                    Event newEvent = new Event(itemid, selectedType, stDate, stVenueName, stAdress, stCity, stDress,"new", food,null);
+                    Event newEvent = new Event(itemid, selectedType, stDate, stVenueName, stAdress, stCity, stDress,"new", food,usersSelected);
                     databaseService.createNewEvent(newEvent, new DatabaseService.DatabaseCallback<Void>() {
                         @Override
                         public void onCompleted(Void object) {
@@ -247,6 +249,23 @@ public class addEVENT extends AppCompatActivity implements View.OnClickListener,
 
                             Log.d("TAG", "Event added successfully");
                             Toast.makeText(addEVENT.this, "Item added successfully", Toast.LENGTH_SHORT).show();
+
+
+                            for(int i=0;i<usersSelected.size();i++){
+
+                                databaseService.addEventToUser(usersSelected.get(i).getId(), newEvent, new DatabaseService.DatabaseCallback<Void>() {
+                                    @Override
+                                    public void onCompleted(Void object) {
+
+                                    }
+
+                                    @Override
+                                    public void onFailed(Exception e) {
+
+                                    }
+                                });
+                            }
+
                             Intent goReg = new Intent(addEVENT.this, AfterLogPage.class);
                             startActivity(goReg);
 
@@ -265,6 +284,12 @@ public class addEVENT extends AppCompatActivity implements View.OnClickListener,
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        User selectedUser = (User) parent.getItemAtPosition(position);  // Get the clicked user
+
+        usersSelected.add(selectedUser);  // Remove from selected list
+
+        selectedAdapter.notifyDataSetChanged();  // Refresh the selected list
+
 
     }
 }

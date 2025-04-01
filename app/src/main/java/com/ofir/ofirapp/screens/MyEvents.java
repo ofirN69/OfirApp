@@ -18,67 +18,66 @@ import com.google.firebase.database.ValueEventListener;
 import com.ofir.ofirapp.R;
 import com.ofir.ofirapp.adapters.EventAdapter;
 import com.ofir.ofirapp.models.Event;
+import com.ofir.ofirapp.services.AuthenticationService;
+import com.ofir.ofirapp.services.DatabaseService;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MyEvents extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private EventAdapter eventAdapter;
-    private ArrayList<Event> eventList;
-    private DatabaseReference databaseReference;
+    private ArrayList<Event> eventList=new ArrayList<>();
+
     private String userId;
+    private AuthenticationService authenticationService;
+    private DatabaseService databaseService;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_events);
+        /// get the instance of the authentication service
+        authenticationService = AuthenticationService.getInstance();
+        /// get the instance of the database service
+        databaseService = DatabaseService.getInstance();
+        userId=authenticationService.getCurrentUserId();
 
-        recyclerView = findViewById(R.id.recyclerViewEvents);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+
+        //recyclerView = findViewById(R.id.recyclerViewEvents);
+      //  recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         eventList = new ArrayList<>();
-        eventAdapter = new EventAdapter(eventList);
-        recyclerView.setAdapter(eventAdapter);
+        //eventAdapter = new EventAdapter( eventList,MyEvents.this);
+       // recyclerView.setAdapter(eventAdapter);
 
-        databaseReference = FirebaseDatabase.getInstance().getReference("events");
-        userId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // Get the logged-in user's ID
-
-        loadUserEvents();
-    }
-
-    private void loadUserEvents() {
-        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseService.getUserEvents(userId, new DatabaseService.DatabaseCallback<List<Event>>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+            public void onCompleted(List<Event> object) {
                 eventList.clear();
-                for (DataSnapshot eventSnapshot : snapshot.getChildren()) {
-                    Event event = eventSnapshot.getValue(Event.class);
-                    if (event != null) {
-                        // ✅ Check if the user is the creator OR is in the invited list
-                        if (event.getCreatedBy().equals(userId) || isUserInvited(event)) {
-                            eventList.add(event);
-                        }
-                    }
-                }
-                eventAdapter.notifyDataSetChanged();
+                eventList.addAll(object);
+
+
+
+
+              // eventAdapter.notifyDataSetChanged();
+
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(MyEvents.this, "Failed to load events", Toast.LENGTH_SHORT).show();
-                Log.e("Firebase", "Error loading events", error.toException());
+            public void onFailed(Exception e) {
+
             }
         });
+
+
+
+
     }
 
-    private boolean isUserInvited(Event event) {
-        if (event.getInvitedUsers() == null) return false;
-        for (String invitedUserId : event.getInvitedUsers()) {
-            if (invitedUserId.equals(userId)) {
-                return true;
-            }
-        }
-        return false;
-    }
+
+
 }

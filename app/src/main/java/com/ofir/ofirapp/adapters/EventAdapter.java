@@ -1,5 +1,6 @@
 package com.ofir.ofirapp.adapters;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +17,13 @@ import java.util.ArrayList;
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHolder> {
 
     private ArrayList<Event> eventList;
+    Context context;
 
-    public EventAdapter(ArrayList<Event> eventList) {
+
+
+    public EventAdapter(ArrayList<Event> eventList, Context context) {
         this.eventList = eventList;
+        this.context = context;
     }
 
     @NonNull

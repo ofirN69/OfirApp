@@ -13,10 +13,11 @@
         android:theme="@style/Theme.OfirApp"
         tools:targetApi="31">
         <activity
+            android:name=".screens.ui.UserEvents"
+            android:exported="false" />
+        <activity
             android:name=".screens.AdminPage"
             android:exported="false" />
-
-
         <activity
             android:name=".screens.MyEvents"
             android:exported="false" />

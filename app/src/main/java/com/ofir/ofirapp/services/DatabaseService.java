@@ -121,6 +121,7 @@ public class DatabaseService {
             List<User> users = new ArrayList<>();
             task.getResult().getChildren().forEach(dataSnapshot -> {
                 User user = dataSnapshot.getValue(User.class);
+                user=new User(user);
                 users.add(user);
             });
 
@@ -130,12 +131,40 @@ public class DatabaseService {
 
     // Add selected users to an event
     public void addSelectedUserToEvent(@NotNull final String eventId, @NotNull final User user, @Nullable final DatabaseCallback<Void> callback) {
-        writeData("events/" + eventId + "/selectedUsers/" + user.getId(), user, callback);
+        writeData("events/" + eventId + "/users/" + user.getId(), user, callback);
+    }
+
+
+
+    // Add selected users to an event
+    public void addEventToUser(@NotNull final String userId, @NotNull final Event event, @Nullable final DatabaseCallback<Void> callback) {
+        writeData("userEvents/" + userId + "/myEvents/" + event.getId(), event, callback);
+    }
+
+
+    // Get selected users of an event
+    public void getUserEvents(@NotNull final String userId, @NotNull final DatabaseCallback<List<Event>> callback) {
+
+        readData("userEvents/" + userId + "/myEvents/").get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.e(TAG, "Error getting selected users", task.getException());
+                callback.onFailed(task.getException());
+                return;
+            }
+            List<Event> userEvents = new ArrayList<>();
+            task.getResult().getChildren().forEach(dataSnapshot -> {
+                Event event = dataSnapshot.getValue(Event.class);
+                Log.e(TAG, "event "+ event.toString());
+                userEvents.add(event);
+            });
+
+            callback.onCompleted(userEvents);
+        });
     }
 
     // Get selected users of an event
     public void getSelectedUsersForEvent(@NotNull final String eventId, @NotNull final DatabaseCallback<List<User>> callback) {
-        readData("events/" + eventId + "/selectedUsers").get().addOnCompleteListener(task -> {
+        readData("events/" + eventId + "/users").get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e(TAG, "Error getting selected users", task.getException());
                 callback.onFailed(task.getException());
