@@ -142,23 +142,52 @@ public class DatabaseService {
     }
 
 
-    // Get selected users of an event
+    // Get events for a user (both owned and invited)
     public void getUserEvents(@NotNull final String userId, @NotNull final DatabaseCallback<List<Event>> callback) {
-
-        readData("userEvents/" + userId + "/myEvents/").get().addOnCompleteListener(task -> {
-            if (!task.isSuccessful()) {
-                Log.e(TAG, "Error getting selected users", task.getException());
-                callback.onFailed(task.getException());
+        // First, get all events to check for ownership
+        readData("events").get().addOnCompleteListener(allEventsTask -> {
+            if (!allEventsTask.isSuccessful()) {
+                Log.e(TAG, "Error getting all events", allEventsTask.getException());
+                callback.onFailed(allEventsTask.getException());
                 return;
             }
-            List<Event> userEvents = new ArrayList<>();
-            task.getResult().getChildren().forEach(dataSnapshot -> {
+
+            List<Event> allUserEvents = new ArrayList<>();
+
+            // Get events where user is the owner
+            allEventsTask.getResult().getChildren().forEach(dataSnapshot -> {
                 Event event = dataSnapshot.getValue(Event.class);
-                Log.e(TAG, "event "+ event.toString());
-                userEvents.add(event);
+                if (event != null) {
+                    // Add all events where the user is the owner
+                    if (userId.equals(event.getOwnerId())) {
+                        Log.d(TAG, "Found owned event: " + event.getId() + " for user: " + userId);
+                        allUserEvents.add(event);
+                    }
+                }
             });
 
-            callback.onCompleted(userEvents);
+            // Then get events where user is invited
+            readData("userEvents/" + userId + "/myEvents").get().addOnCompleteListener(invitedEventsTask -> {
+                if (!invitedEventsTask.isSuccessful()) {
+                    Log.e(TAG, "Error getting invited events", invitedEventsTask.getException());
+                    callback.onFailed(invitedEventsTask.getException());
+                    return;
+                }
+
+                invitedEventsTask.getResult().getChildren().forEach(dataSnapshot -> {
+                    Event event = dataSnapshot.getValue(Event.class);
+                    if (event != null) {
+                        // Add events where user is invited (not the owner)
+                        if (!userId.equals(event.getOwnerId())) {
+                            Log.d(TAG, "Found invited event: " + event.getId() + " for user: " + userId);
+                            allUserEvents.add(event);
+                        }
+                    }
+                });
+
+                Log.d(TAG, "Total events found for user " + userId + ": " + allUserEvents.size());
+                callback.onCompleted(allUserEvents);
+            });
         });
     }
 
@@ -178,5 +207,29 @@ public class DatabaseService {
 
             callback.onCompleted(selectedUsers);
         });
+    }
+
+    // Remove an event from the main events collection
+    public void removeEvent(@NotNull final String eventId, @Nullable final DatabaseCallback<Void> callback) {
+        databaseReference.child("events").child(eventId).removeValue()
+            .addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    if (callback != null) callback.onCompleted(null);
+                } else {
+                    if (callback != null) callback.onFailed(task.getException());
+                }
+            });
+    }
+
+    // Remove an event from a user's events list
+    public void removeEventFromUser(@NotNull final String userId, @NotNull final String eventId, @Nullable final DatabaseCallback<Void> callback) {
+        databaseReference.child("userEvents").child(userId).child("myEvents").child(eventId).removeValue()
+            .addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    if (callback != null) callback.onCompleted(null);
+                } else {
+                    if (callback != null) callback.onFailed(task.getException());
+                }
+            });
     }
 }

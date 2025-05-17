@@ -20,7 +20,7 @@ import com.ofir.ofirapp.services.DatabaseService;
 import com.ofir.ofirapp.utils.SharedPreferencesUtil;
 import com.ofir.ofirapp.utils.Validator;
 
-
+import android.app.ProgressDialog;
 
 public class Login extends AppCompatActivity implements View.OnClickListener,AuthenticationService.AuthCallback<String> {
 
@@ -111,20 +111,46 @@ public class Login extends AppCompatActivity implements View.OnClickListener,Aut
     }
     @Override
     public void onCompleted(String id) {
-        Log.d("TAG", "signInWithEmail:success");
-        if (etEmail.equals(admin) && etPassword.equals(passadmin)) {
-            Intent golog = new Intent(getApplicationContext(), AdminPage.class);
-            isAdmin = true;
-            startActivity(golog);
-        } else {
-            Intent go = new Intent(getApplicationContext(), AfterLogPage.class);
-            startActivity(go);
-        }
+        Log.d(TAG, "signInWithEmail:success");
+        // Get user data from database
+        databaseService.getUser(id, new DatabaseService.DatabaseCallback<User>() {
+            @Override
+            public void onCompleted(User user2) {
+                Log.d(TAG, "onCompleted: User data retrieved successfully "+user2.toString());
+                runOnUiThread(() -> {
+                    if (email.equals(admin) && password.equals(passadmin)) {
+                        Intent golog = new Intent(Login.this, AdminPage.class);
+                        isAdmin = true;
+                        startActivity(golog);
+                        finish();  // Prevent going back to login
+                    } else {
+                        Intent mainIntent = new Intent(Login.this, AfterLogPage.class);
+                        mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(mainIntent);
+                        finish();  // Prevent going back to login
+                    }
+                });
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+                Log.e(TAG, "onFailed: Failed to retrieve user data", e);
+                runOnUiThread(() -> {
+                    Toast.makeText(Login.this, "Failed to retrieve user data", Toast.LENGTH_LONG).show();
+                    btnGoLog.setEnabled(true);
+                });
+            }
+        });
     }
 
     @Override
     public void onFailed(Exception e) {
-
+        Log.e(TAG, "Authentication failed", e);
+        runOnUiThread(() -> {
+            Toast.makeText(Login.this, "Authentication failed: " + e.getMessage(),
+                    Toast.LENGTH_LONG).show();
+            btnGoLog.setEnabled(true);
+        });
     }
 
 
@@ -155,59 +181,69 @@ public class Login extends AppCompatActivity implements View.OnClickListener,Aut
     }
 
     private void loginUser(String email, String password) {
+        btnGoLog.setEnabled(false);  // Disable button during login
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Logging in...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+        
         authenticationService.signIn(email, password, new AuthenticationService.AuthCallback<String>() {
-            /// Callback method called when the operation is completed
-            /// @param uid the user ID of the user that is logged in
             @Override
             public void onCompleted(String uid) {
+                if (progressDialog.isShowing()) {
+                    progressDialog.dismiss();
+                }
                 Log.d(TAG, "onCompleted: User logged in successfully");
-                /// get the user data from the database
+                // Get user data from database
                 databaseService.getUser(uid, new DatabaseService.DatabaseCallback<User>() {
                     @Override
                     public void onCompleted(User user2) {
-
-
                         Log.d(TAG, "onCompleted: User data retrieved successfully "+user2.toString());
-                        /// save the user data to shared preferences
-                       // SharedPreferencesUtil.saveUser(Login.this, user2);
-                        /// Redirect to main activity and clear back stack to prevent user from going back to login screen
-                        if (email.equals(admin) && password.equals(passadmin)) {
-                            Intent golog = new Intent(getApplicationContext(), AdminPage.class);
-                            isAdmin = true;
-                            startActivity(golog);
-                        }
-
-
-                        else {
-                            Intent mainIntent = new Intent(Login.this, AfterLogPage.class);
-
-                            /// Clear the back stack (clear history) and start the MainActivity
-                            mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            startActivity(mainIntent);
-                        }
+                        // Save user data to shared preferences
+                        SharedPreferencesUtil.saveUser(Login.this, user2);
+                        
+                        runOnUiThread(() -> {
+                            if (email.equals(admin) && password.equals(passadmin)) {
+                                Intent golog = new Intent(Login.this, AdminPage.class);
+                                isAdmin = true;
+                                startActivity(golog);
+                                finish();  // Prevent going back to login
+                            } else {
+                                Intent mainIntent = new Intent(Login.this, AfterLogPage.class);
+                                mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(mainIntent);
+                                finish();  // Prevent going back to login
+                            }
+                        });
                     }
 
                     @Override
                     public void onFailed(Exception e) {
                         Log.e(TAG, "onFailed: Failed to retrieve user data", e);
-                        /// Show error message to user
-                        etPassword.setError("Invalid email or password");
-                        etPassword.requestFocus();
-                        /// Sign out the user if failed to retrieve user data
-                        /// This is to prevent the user from being logged in again
-                        authenticationService.signOut();
+                        runOnUiThread(() -> {
+                            if (progressDialog.isShowing()) {
+                                progressDialog.dismiss();
+                            }
+                            Toast.makeText(Login.this, "Failed to retrieve user data", Toast.LENGTH_LONG).show();
+                            btnGoLog.setEnabled(true);
+                            // Sign out the user if failed to retrieve user data
+                            authenticationService.signOut();
+                        });
                     }
                 });
             }
 
             @Override
             public void onFailed(Exception e) {
-
-                // If sign in fails, display a message to the user.
-                Log.w("TAG", "signInWithEmail:failure", e);
-                Toast.makeText(getApplicationContext(), "Authentication failed.",
-                        Toast.LENGTH_SHORT).show();
-//                                updateUI(null);
+                Log.e(TAG, "Authentication failed", e);
+                runOnUiThread(() -> {
+                    if (progressDialog.isShowing()) {
+                        progressDialog.dismiss();
+                    }
+                    Toast.makeText(Login.this, "Authentication failed: " + e.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                    btnGoLog.setEnabled(true);
+                });
             }
         });
     }

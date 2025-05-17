@@ -28,9 +28,11 @@ public class Event {
 
    String menutype;
 
+    String ownerId;
+
     ArrayList<User> users;
 
-    public Event(String id, String type, String date,  String venue, String address, String city, String dresscode, String status, String menutype, ArrayList<User> users) {
+    public Event(String id, String type, String date,  String venue, String address, String city, String dresscode, String status, String menutype, String ownerId, ArrayList<User> users) {
         this.id = id;
         this.type = type;
         this.date = date;
@@ -40,6 +42,7 @@ public class Event {
         this.dresscode = dresscode;
         this.status = status;
         this.menutype = menutype;
+        this.ownerId = ownerId;
         this.users = users;
     }
 
@@ -119,6 +122,14 @@ public class Event {
         this.users = users;
     }
 
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
     @Override
     public String toString() {
         return "Event{" +
@@ -131,6 +142,7 @@ public class Event {
                 ", dresscode='" + dresscode + '\'' +
                 ", status='" + status + '\'' +
                 ", menutype='" + menutype + '\'' +
+                ", ownerId='" + ownerId + '\'' +
                 ", users=" + users +
                 '}';
     }

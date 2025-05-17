@@ -1,10 +1,7 @@
 package com.ofir.ofirapp.screens;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -18,279 +15,304 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-
 
 import com.ofir.ofirapp.R;
 import com.ofir.ofirapp.adapters.UserNamAdapter;
 import com.ofir.ofirapp.models.Event;
 import com.ofir.ofirapp.models.User;
 import com.ofir.ofirapp.services.DatabaseService;
+import com.ofir.ofirapp.services.AuthenticationService;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+public class addEVENT extends AppCompatActivity {
+    // UI Components
+    private CalendarView cvEventDate;
+    private Spinner spinnerEventType;
+    private RadioGroup rgFood;
+    private RadioButton rbDairy, rbVegetarian, rbVegan, rbMeat;
+    private TextView dateTextView;
+    private EditText etVenueName, etDress, etAddress, etCity;
+    private Button btnAddEvent;
+    private ListView lvMembers, lvSelectedMembers;
 
-public class addEVENT extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener {
+    // Adapters
+    private UserNamAdapter<User> availableUsersAdapter;
+    private UserNamAdapter<User> selectedUsersAdapter;
 
-    CalendarView cvEventDate;
-    Spinner spinnertype;  // Spinner for sizes
-    RadioGroup RGFood;
-    RadioButton rbDairy, rbVegetarian, rbVegan, rbMeat;
-    String food, stDate;
-
-    TextView dateTextView;
-
-    EditText etVenueName,  etDress,  etAdress, etCity;
-    String stVenueName, stDress, stTime, stAdress, stCity;
-    Button btnAddEvent;
-
+    // Data
     private DatabaseService databaseService;
-    private String selectedType;
-
-
+    private ArrayList<User> availableUsers;
+    private ArrayList<User> selectedUsers;
+    private String selectedEventType;
+    private String selectedFood;
+    private String selectedDate;
     private String uid;
-
-    User user;
-
-    ListView lvMembers,lvSelectedMembers;
-
-
-    ArrayList<User> users=new ArrayList<>();
-    UserNamAdapter<User> adapter;
-    private UserNamAdapter<User> selectedAdapter;
-
-
-    ArrayList<User> usersSelected=new ArrayList<>();
-
-    String members="";
-
-
+    private User currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_event);
 
+        initializeData();
+        initializeViews();
+        setupListeners();
+        loadUsers();
+    }
+
+    private void initializeData() {
         databaseService = DatabaseService.getInstance();
+        availableUsers = new ArrayList<>();
+        selectedUsers = new ArrayList<>();
+        uid = AuthenticationService.getInstance().getCurrentUserId();
+    }
 
-        initViews();
-        btnAddEvent.setOnClickListener(this);
+    private void initializeViews() {
+        // Initialize UI components
+        btnAddEvent = findViewById(R.id.btnAddItem);
+        cvEventDate = findViewById(R.id.cvEventDate);
+        dateTextView = findViewById(R.id.dateTextView);
+        spinnerEventType = findViewById(R.id.spItemTYpe);
+        etVenueName = findViewById(R.id.etVenue);
+        etDress = findViewById(R.id.etDressCode);
+        etAddress = findViewById(R.id.etAdress);
+        etCity = findViewById(R.id.etCity);
+        rgFood = findViewById(R.id.RGFood);
+        rbDairy = findViewById(R.id.rbDairy);
+        rbVegetarian = findViewById(R.id.rbVegetarian);
+        rbVegan = findViewById(R.id.rbVegan);
+        rbMeat = findViewById(R.id.rbMeat);
+        lvMembers = findViewById(R.id.lvMembers);
+        lvSelectedMembers = findViewById(R.id.lvSelected);
 
+        // Setup adapters
+        availableUsersAdapter = new UserNamAdapter<>(this, 0, 0, availableUsers);
+        selectedUsersAdapter = new UserNamAdapter<>(this, 0, 0, selectedUsers);
 
-        users = new ArrayList<>();
-        adapter = new UserNamAdapter<>(addEVENT.this, 0, 0, users);
+        lvMembers.setAdapter(availableUsersAdapter);
+        lvSelectedMembers.setAdapter(selectedUsersAdapter);
 
+        // Set default date
+        setDefaultDate();
+    }
 
-        lvMembers.setAdapter(adapter);
-        lvMembers.setOnItemClickListener(this);
+    private void setDefaultDate() {
+        long currentDate = cvEventDate.getDate();
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+        selectedDate = sdf.format(new Date(currentDate));
+        dateTextView.setText("Selected Date: " + selectedDate);
+    }
 
-        selectedAdapter = new UserNamAdapter<>(addEVENT.this, 0, 0, usersSelected);
-        lvSelectedMembers.setAdapter(selectedAdapter);
+    private void setupListeners() {
+        btnAddEvent.setOnClickListener(v -> validateAndCreateEvent());
 
-        // Click listener for removing users from lvSelectedMembers
-        lvSelectedMembers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                User selectedUser = usersSelected.get(position);  // Get the clicked user
+        cvEventDate.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
+            selectedDate = year + "-" + (month + 1) + "-" + dayOfMonth;
+            dateTextView.setText("Selected Date: " + selectedDate);
+        });
 
-                usersSelected.remove(selectedUser);  // Remove from selected list
-
-                selectedAdapter.notifyDataSetChanged();  // Refresh the selected list
+        lvMembers.setOnItemClickListener((parent, view, position, id) -> {
+            User selectedUser = availableUsers.get(position);
+            if (!isUserAlreadySelected(selectedUser)) {
+                selectedUsers.add(selectedUser);
+                selectedUsersAdapter.notifyDataSetChanged();
+            } else {
+                Toast.makeText(addEVENT.this, "User already added to event", Toast.LENGTH_SHORT).show();
             }
         });
 
+        lvSelectedMembers.setOnItemClickListener((parent, view, position, id) -> {
+            selectedUsers.remove(position);
+            selectedUsersAdapter.notifyDataSetChanged();
+        });
+    }
 
+    private boolean isUserAlreadySelected(User user) {
+        for (User selectedUser : selectedUsers) {
+            if (selectedUser.getId().equals(user.getId())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
+    private void loadUsers() {
         databaseService.getUsers(new DatabaseService.DatabaseCallback<List<User>>() {
             @Override
-            public void onCompleted(List<User> object) {
-                users.clear();
-                users.addAll(object);
-                adapter.notifyDataSetChanged();
+            public void onCompleted(List<User> users) {
+                availableUsers.clear();
+                availableUsers.addAll(users);
+                availableUsersAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onFailed(Exception e) {
-                Log.e("TAG", "onFailed: ", e);
+                Log.e("TAG", "Failed to load users", e);
+                Toast.makeText(addEVENT.this, "Failed to load users", Toast.LENGTH_SHORT).show();
             }
         });
 
         databaseService.getUser(uid, new DatabaseService.DatabaseCallback<User>() {
             @Override
-            public void onCompleted(User u) {
-                user = u;
+            public void onCompleted(User user) {
+                currentUser = user;
             }
 
             @Override
             public void onFailed(Exception e) {
+                Log.e("TAG", "Failed to load current user", e);
             }
         });
-
     }
 
-    private void initViews() {
-        btnAddEvent = findViewById(R.id.btnAddItem);
-        cvEventDate = findViewById(R.id.cvEventDate);
-        dateTextView = findViewById(R.id.dateTextView);
-        spinnertype = findViewById(R.id.spItemTYpe);
-        etVenueName = findViewById(R.id.etVenue);
-        etDress = findViewById(R.id.etDressCode);
-        etAdress = findViewById(R.id.etAdress);
-        etCity = findViewById(R.id.etCity);
-        RGFood = findViewById(R.id.RGFood);
-        rbDairy = findViewById(R.id.rbDairy);
-        rbVegetarian = findViewById(R.id.rbVegetarian);
-        rbVegan = findViewById(R.id.rbVegan);
-        rbMeat = findViewById(R.id.rbMeat);
+    private void validateAndCreateEvent() {
+        if (!validateInputs()) {
+            return;
+        }
 
-        lvMembers=findViewById(R.id.lvMembers);
-        lvSelectedMembers=findViewById(R.id.lvSelected);
-        // Set default date to today
-        long currentDate = cvEventDate.getDate();
-        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
-        stDate = sdf.format(new Date(currentDate));
+        selectedEventType = spinnerEventType.getSelectedItem().toString();
+        selectedFood = getSelectedFoodType();
 
-        // Display default date in TextView
-        dateTextView.setText("Selected Date: " + stDate);
+        String eventId = databaseService.generateEventId();
+        Event newEvent = new Event(
+            eventId,
+            selectedEventType,
+            selectedDate,
+            etVenueName.getText().toString(),
+            etAddress.getText().toString(),
+            etCity.getText().toString(),
+            etDress.getText().toString(),
+            "new",
+            selectedFood,
+            uid,
+            selectedUsers
+        );
 
-        // Update date when user selects a new date
-        cvEventDate.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
-            stDate = year + "-" + (month + 1) + "-" + dayOfMonth; // Convert date to string
-            dateTextView.setText("Selected Date: " + stDate); // Display in TextView
-
-            dateTextView.setText(stDate);
-        });
-
-        // Set listener to show or hide size spinner based on item type
-
+        createEvent(newEvent);
     }
 
-    @Override
-    public void onClick(View view) {
+    private boolean validateInputs() {
+        if (TextUtils.isEmpty(etVenueName.getText())) {
+            showError("Please enter the venue name");
+            return false;
+        }
+        if (TextUtils.isEmpty(etAddress.getText())) {
+            showError("Please enter the address");
+            return false;
+        }
+        if (TextUtils.isEmpty(etCity.getText())) {
+            showError("Please enter the city");
+            return false;
+        }
+        if (TextUtils.isEmpty(etDress.getText())) {
+            showError("Please enter the dress code");
+            return false;
+        }
+        if (spinnerEventType.getSelectedItemPosition() == 0) {
+            showError("Please select a valid event type");
+            return false;
+        }
+        if (rgFood.getCheckedRadioButtonId() == -1) {
+            showError("Please select a food preference");
+            return false;
+        }
+        if (TextUtils.isEmpty(selectedDate)) {
+            showError("Please select a date");
+            return false;
+        }
 
-        if (view == btnAddEvent) {
-            selectedType = spinnertype.getSelectedItem().toString();
-            stDress = etDress.getText().toString() + "";
-            stVenueName = etVenueName.getText().toString() + "";
-            stAdress = etAdress.getText().toString() + "";
-            stCity = etCity.getText().toString() + "";
+        // Check if selected date has passed
+        try {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+            Date selectedEventDate = sdf.parse(selectedDate);
+            Date currentDate = new Date();
+            
+            // Set time to beginning of day for fair comparison
+            currentDate = sdf.parse(sdf.format(currentDate));
+            
+            if (selectedEventDate.before(currentDate)) {
+                showError("Cannot create an event for a past date");
+                return false;
+            }
+        } catch (Exception e) {
+            Log.e("TAG", "Date parsing error", e);
+            showError("Invalid date format");
+            return false;
+        }
 
-            int selectedId = RGFood.getCheckedRadioButtonId();
-            if (selectedId == rbDairy.getId()) {
-                food = "Dairy";
-                  }
-                else if (selectedId == rbVegetarian.getId()) {
-                                food = "Vegetarian";
+        return true;
+    }
+
+    private String getSelectedFoodType() {
+        int selectedId = rgFood.getCheckedRadioButtonId();
+        if (selectedId == rbDairy.getId()) return "Dairy";
+        if (selectedId == rbVegetarian.getId()) return "Vegetarian";
+        if (selectedId == rbVegan.getId()) return "Vegan";
+        if (selectedId == rbMeat.getId()) return "Meat";
+        return "";
+    }
+
+    private void showError(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    private void createEvent(Event newEvent) {
+        // First create the event in the main events collection
+        databaseService.createNewEvent(newEvent, new DatabaseService.DatabaseCallback<Void>() {
+            @Override
+            public void onCompleted(Void object) {
+                Log.d("TAG", "Event created successfully with ID: " + newEvent.getId());
+                
+                // Add event to creator's events list
+                databaseService.addEventToUser(uid, newEvent, new DatabaseService.DatabaseCallback<Void>() {
+                    @Override
+                    public void onCompleted(Void object) {
+                        Log.d("TAG", "Event added to creator's list: " + uid);
+                        
+                        // Add event to selected users' lists
+                        for (User user : selectedUsers) {
+                            databaseService.addEventToUser(user.getId(), newEvent, new DatabaseService.DatabaseCallback<Void>() {
+                                @Override
+                                public void onCompleted(Void object) {
+                                    Log.d("TAG", "Event added to user's list: " + user.getId());
+                                }
+
+                                @Override
+                                public void onFailed(Exception e) {
+                                    Log.e("TAG", "Failed to add event to user: " + user.getId(), e);
+                                }
+                            });
+                        }
+
+                        // Navigate only after all operations are complete
+                        navigateToAfterLogPage();
                     }
-                            else if (selectedId == rbVegan.getId()) {
-                                      food = "vegan";
-                            }
 
-
-                                    else if (selectedId == rbMeat.getId()) {
-                                         food = "Meat";
-                                     }
-
-
-
-
-            // בדיקת תקינות קלט
-            if (TextUtils.isEmpty(stVenueName)) {
-                Toast.makeText(this, "Please enter the venue name", Toast.LENGTH_SHORT).show();
-                return;
+                    @Override
+                    public void onFailed(Exception e) {
+                        Log.e("TAG", "Failed to add event to creator's list: " + e.getMessage());
+                        // Still navigate even if adding to creator's list fails
+                        navigateToAfterLogPage();
+                    }
+                });
             }
 
-
-            if (TextUtils.isEmpty(stAdress)) {
-                Toast.makeText(this, "Please enter the address", Toast.LENGTH_SHORT).show();
-                return;
+            @Override
+            public void onFailed(Exception e) {
+                Log.e("TAG", "Failed to create event: " + e.getMessage());
+                Toast.makeText(addEVENT.this, "Failed to create event", Toast.LENGTH_SHORT).show();
             }
+        });
+    }
 
-            if (TextUtils.isEmpty(stCity)) {
-                Toast.makeText(this, "Please enter the city", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if (TextUtils.isEmpty(stDress)) {
-                Toast.makeText(this, "Please enter the dress code", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if (spinnertype.getSelectedItemPosition() == 0) { // Assuming first position is a placeholder
-                Toast.makeText(this, "Please select a valid event type", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if (selectedId == -1) { // אם לא נבחר שום כפתור
-                Toast.makeText(this, "Please select a food preference", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if (TextUtils.isEmpty(stDate)) {
-                Toast.makeText(this, "Please select a date", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            // Set a listener to get the date when it's selected
-            String itemid = databaseService.generateEventId();
-
-                //  public Event(String type, String date, String hour, String venue, String address, String city, String dresscode, String status, ArrayList < String > menutype, ArrayList < User > users)
-
-                    Event newEvent = new Event(itemid, selectedType, stDate, stVenueName, stAdress, stCity, stDress,"new", food,usersSelected);
-                    databaseService.createNewEvent(newEvent, new DatabaseService.DatabaseCallback<Void>() {
-                        @Override
-                        public void onCompleted(Void object) {
-                            // handle completion
-
-                            Log.d("TAG", "Event added successfully");
-                            Toast.makeText(addEVENT.this, "Item added successfully", Toast.LENGTH_SHORT).show();
-
-
-                            for(int i=0;i<usersSelected.size();i++){
-
-                                databaseService.addEventToUser(usersSelected.get(i).getId(), newEvent, new DatabaseService.DatabaseCallback<Void>() {
-                                    @Override
-                                    public void onCompleted(Void object) {
-
-                                    }
-
-                                    @Override
-                                    public void onFailed(Exception e) {
-
-                                    }
-                                });
-                            }
-
-                            Intent goReg = new Intent(addEVENT.this, AfterLogPage.class);
-                            startActivity(goReg);
-
-                        }
-
-                        @Override
-                        public void onFailed(Exception e) {
-                            // handle failure
-                            Log.e("TAG", "Failed to add Event", e);
-                            Toast.makeText(addEVENT.this, "Failed to add Item", Toast.LENGTH_SHORT).show();
-
-                        }
-                    });
-                }
-            }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        User selectedUser = (User) parent.getItemAtPosition(position);  // Get the clicked user
-
-        usersSelected.add(selectedUser);  // Remove from selected list
-
-        selectedAdapter.notifyDataSetChanged();  // Refresh the selected list
-
-
+    private void navigateToAfterLogPage() {
+        Intent intent = new Intent(addEVENT.this, AfterLogPage.class);
+        startActivity(intent);
+        finish();
     }
 }
 
