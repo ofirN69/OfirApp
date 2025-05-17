@@ -3,10 +3,10 @@ package com.ofir.ofirapp.services;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.annotations.NotNull;
 import com.ofir.ofirapp.models.Event;
 import com.ofir.ofirapp.models.User;
 
@@ -40,7 +40,7 @@ public class DatabaseService {
         void onFailed(Exception e);
     }
 
-    private void writeData(@NotNull final String path, @NotNull final Object data, final @Nullable DatabaseCallback<Void> callback) {
+    private void writeData(@NonNull final String path, @NonNull final Object data, final @Nullable DatabaseCallback<Void> callback) {
         databaseReference.child(path).setValue(data).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 if (callback != null) callback.onCompleted(null);
@@ -50,11 +50,11 @@ public class DatabaseService {
         });
     }
 
-    private DatabaseReference readData(@NotNull final String path) {
+    private DatabaseReference readData(@NonNull final String path) {
         return databaseReference.child(path);
     }
 
-    private <T> void getData(@NotNull final String path, @NotNull final Class<T> clazz, @NotNull final DatabaseCallback<T> callback) {
+    private <T> void getData(@NonNull final String path, @NonNull final Class<T> clazz, @NonNull final DatabaseCallback<T> callback) {
         readData(path).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e(TAG, "Error getting data", task.getException());
@@ -66,23 +66,23 @@ public class DatabaseService {
         });
     }
 
-    private String generateNewId(@NotNull final String path) {
+    private String generateNewId(@NonNull final String path) {
         return databaseReference.child(path).push().getKey();
     }
 
-    public void createNewUser(@NotNull final User user, @Nullable final DatabaseCallback<Void> callback) {
+    public void createNewUser(@NonNull final User user, @Nullable final DatabaseCallback<Void> callback) {
         writeData("Users/" + user.getId(), user, callback);
     }
 
-    public void createNewEvent(@NotNull final Event event, @Nullable final DatabaseCallback<Void> callback) {
+    public void createNewEvent(@NonNull final Event event, @Nullable final DatabaseCallback<Void> callback) {
         writeData("events/" + event.getId(), event, callback);
     }
 
-    public void getUser(@NotNull final String uid, @NotNull final DatabaseCallback<User> callback) {
+    public void getUser(@NonNull final String uid, @NonNull final DatabaseCallback<User> callback) {
         getData("Users/" + uid, User.class, callback);
     }
 
-    public void getEvent(@NotNull final String eventId, @NotNull final DatabaseCallback<Event> callback) {
+    public void getEvent(@NonNull final String eventId, @NonNull final DatabaseCallback<Event> callback) {
         getData("events/" + eventId, Event.class, callback);
     }
 
@@ -94,7 +94,7 @@ public class DatabaseService {
         return generateNewId("carts");
     }
 
-    public void getEvents(@NotNull final DatabaseCallback<List<Event>> callback) {
+    public void getEvents(@NonNull final DatabaseCallback<List<Event>> callback) {
         readData("events").get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e(TAG, "Error getting data", task.getException());
@@ -111,7 +111,7 @@ public class DatabaseService {
         });
     }
 
-    public void getUsers(@NotNull final DatabaseCallback<List<User>> callback) {
+    public void getUsers(@NonNull final DatabaseCallback<List<User>> callback) {
         readData("Users").get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e(TAG, "Error getting data", task.getException());
@@ -121,7 +121,7 @@ public class DatabaseService {
             List<User> users = new ArrayList<>();
             task.getResult().getChildren().forEach(dataSnapshot -> {
                 User user = dataSnapshot.getValue(User.class);
-                user=new User(user);
+                user = new User(user);
                 users.add(user);
             });
 
@@ -130,20 +130,17 @@ public class DatabaseService {
     }
 
     // Add selected users to an event
-    public void addSelectedUserToEvent(@NotNull final String eventId, @NotNull final User user, @Nullable final DatabaseCallback<Void> callback) {
+    public void addSelectedUserToEvent(@NonNull final String eventId, @NonNull final User user, @Nullable final DatabaseCallback<Void> callback) {
         writeData("events/" + eventId + "/users/" + user.getId(), user, callback);
     }
 
-
-
     // Add selected users to an event
-    public void addEventToUser(@NotNull final String userId, @NotNull final Event event, @Nullable final DatabaseCallback<Void> callback) {
+    public void addEventToUser(@NonNull final String userId, @NonNull final Event event, @Nullable final DatabaseCallback<Void> callback) {
         writeData("userEvents/" + userId + "/myEvents/" + event.getId(), event, callback);
     }
 
-
     // Get events for a user (both owned and invited)
-    public void getUserEvents(@NotNull final String userId, @NotNull final DatabaseCallback<List<Event>> callback) {
+    public void getUserEvents(@NonNull final String userId, @NonNull final DatabaseCallback<List<Event>> callback) {
         // First, get all events to check for ownership
         readData("events").get().addOnCompleteListener(allEventsTask -> {
             if (!allEventsTask.isSuccessful()) {
@@ -192,7 +189,7 @@ public class DatabaseService {
     }
 
     // Get selected users of an event
-    public void getSelectedUsersForEvent(@NotNull final String eventId, @NotNull final DatabaseCallback<List<User>> callback) {
+    public void getSelectedUsersForEvent(@NonNull final String eventId, @NonNull final DatabaseCallback<List<User>> callback) {
         readData("events/" + eventId + "/users").get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e(TAG, "Error getting selected users", task.getException());
@@ -210,7 +207,7 @@ public class DatabaseService {
     }
 
     // Remove an event from the main events collection
-    public void removeEvent(@NotNull final String eventId, @Nullable final DatabaseCallback<Void> callback) {
+    public void removeEvent(@NonNull final String eventId, @Nullable final DatabaseCallback<Void> callback) {
         databaseReference.child("events").child(eventId).removeValue()
             .addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
@@ -222,7 +219,7 @@ public class DatabaseService {
     }
 
     // Remove an event from a user's events list
-    public void removeEventFromUser(@NotNull final String userId, @NotNull final String eventId, @Nullable final DatabaseCallback<Void> callback) {
+    public void removeEventFromUser(@NonNull final String userId, @NonNull final String eventId, @Nullable final DatabaseCallback<Void> callback) {
         databaseReference.child("userEvents").child(userId).child("myEvents").child(eventId).removeValue()
             .addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
@@ -231,5 +228,9 @@ public class DatabaseService {
                     if (callback != null) callback.onFailed(task.getException());
                 }
             });
+    }
+
+    public void updateUser(User user, DatabaseCallback<Void> callback) {
+        writeData("Users/" + user.getId(), user, callback);
     }
 }

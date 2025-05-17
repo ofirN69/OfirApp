@@ -33,7 +33,7 @@ public class AdminPage extends AppCompatActivity {
         User user=SharedPreferencesUtil.getUser(this);
 
         tvHello = findViewById(R.id.tv_hello);
-        tvHello.setText(user.getFname() +"היי המנהל ");
+        tvHello.setText("Hello " + user.getFname() + " welcome to the app (Admin)");
     }
 
     public void onClick(View view) {

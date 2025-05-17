@@ -36,7 +36,7 @@ public class AfterLogPage extends AppCompatActivity implements View.OnClickListe
         User user=SharedPreferencesUtil.getUser(this);
 
         tvHello = findViewById(R.id.tv_hello);
-        tvHello.setText(user.getFname() + "היי ");
+        tvHello.setText("Hello " + user.getFname() + " welcome to the app");
     }
 
     private void initviews() {

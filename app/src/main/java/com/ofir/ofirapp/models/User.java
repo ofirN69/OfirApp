@@ -1,8 +1,20 @@
 package com.ofir.ofirapp.models;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 public class User {
-    String id;
-    String fname, lname, phone,email, password;
+    private String id;
+    private String fname;
+    private String lname;
+    private String phone;
+    private String email;
+    private String password;
+    private String profileImage; // Base64 encoded image string
+
+    public User() {
+        // Required empty constructor for Firebase
+    }
 
     public User(String id, String fname, String lname, String phone, String email, String password) {
         this.id = id;
@@ -11,20 +23,15 @@ public class User {
         this.phone = phone;
         this.email = email;
         this.password = password;
-
     }
+
     public User(User user) {
         this.id = user.id;
         this.fname = user.fname;
         this.lname = user.lname;
         this.phone = user.phone;
         this.email = user.email;
-
-
-    }
-
-
-    public User() {
+        this.profileImage = user.profileImage;
     }
 
     @Override
@@ -36,63 +43,71 @@ public class User {
                 ", phone='" + phone + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
-
+                ", profileImage='" + profileImage + '\'' +
                 '}';
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setFname(String fname) {
-        this.fname = fname;
-    }
-
-    public void setLname(String lname) {
-        this.lname = lname;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
+    @NonNull
     public String getId() {
         return id;
     }
 
+    public void setId(@NonNull String id) {
+        this.id = id;
+    }
+
+    @NonNull
     public String getFname() {
-        return fname;
+        return fname != null ? fname : "";
+    }
+
+    public void setFname(@NonNull String fname) {
+        this.fname = fname;
     }
 
     public String getLname() {
         return lname;
     }
 
+    public void setLname(String lname) {
+        this.lname = lname;
+    }
+
+    @Nullable
     public String getPhone() {
         return phone;
     }
 
+    public void setPhone(@Nullable String phone) {
+        this.phone = phone;
+    }
+
+    @NonNull
     public String getEmail() {
-        return email;
+        return email != null ? email : "";
+    }
+
+    public void setEmail(@NonNull String email) {
+        this.email = email;
     }
 
     public String getPassword() {
         return password;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
+    @Nullable
+    public String getProfileImage() {
+        return profileImage;
+    }
 
-
-
-
+    public void setProfileImage(@Nullable String profileImage) {
+        this.profileImage = profileImage;
+    }
 }
+
 
 

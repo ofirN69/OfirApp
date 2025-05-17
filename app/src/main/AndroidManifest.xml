@@ -2,7 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
+        android:name=".OfirApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -47,6 +50,9 @@
         </activity>
         <activity
             android:name=".screens.EventDetailsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.EditProfileActivity"
             android:exported="false" />
     </application>
 

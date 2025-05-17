@@ -1,6 +1,9 @@
 package com.ofir.ofirapp.screens;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -10,6 +13,8 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -18,26 +23,26 @@ import com.ofir.ofirapp.models.User;
 import com.ofir.ofirapp.services.AuthenticationService;
 import com.ofir.ofirapp.services.DatabaseService;
 import com.ofir.ofirapp.utils.SharedPreferencesUtil;
+import com.ofir.ofirapp.utils.NotificationHelper;
 import com.ofir.ofirapp.utils.Validator;
 
 import android.app.ProgressDialog;
 
 public class Login extends AppCompatActivity implements View.OnClickListener,AuthenticationService.AuthCallback<String> {
 
-
-
     private static final String TAG = "Login";
+    private static final int NOTIFICATION_PERMISSION_CODE = 123;
 
     private EditText etEmail, etPassword;
     private Button btnGoLog;
 
     private AuthenticationService authenticationService;
     private DatabaseService databaseService;
+    private NotificationHelper notificationHelper;
     private User user=null;
 
     String admin = "ofiry.nevo555@gmail.com";
     String passadmin = "123456";
-
 
     public static boolean isAdmin = false;
     private String email;
@@ -59,16 +64,22 @@ public class Login extends AppCompatActivity implements View.OnClickListener,Aut
         authenticationService = AuthenticationService.getInstance();
         /// get the instance of the database service
         databaseService = DatabaseService.getInstance();
+        notificationHelper = new NotificationHelper(this);
 
+        // Request notification permission for Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        NOTIFICATION_PERMISSION_CODE);
+            }
+        }
 
         user = SharedPreferencesUtil.getUser(Login.this);
         /// get the views
         etEmail = findViewById(R.id.etEmailLogin);
-
-
         etPassword = findViewById(R.id.etPasswordLogin);
-
-
         btnGoLog = findViewById(R.id.btnLog);
         btnGoLog.setOnClickListener(this);
         if (user != null)
@@ -84,8 +95,6 @@ public class Login extends AppCompatActivity implements View.OnClickListener,Aut
     public void onClick(View v) {
         if (v.getId() == btnGoLog.getId()) {
             Log.d(TAG, "onClick: Login button clicked");
-
-
 
             /// get the email and password entered by the user
              email = etEmail.getText().toString();
@@ -118,6 +127,9 @@ public class Login extends AppCompatActivity implements View.OnClickListener,Aut
             public void onCompleted(User user2) {
                 Log.d(TAG, "onCompleted: User data retrieved successfully "+user2.toString());
                 runOnUiThread(() -> {
+                    // Show welcome notification
+                    notificationHelper.showLoginSuccess(user2.getFname());
+                    
                     if (email.equals(admin) && password.equals(passadmin)) {
                         Intent golog = new Intent(Login.this, AdminPage.class);
                         isAdmin = true;
@@ -136,6 +148,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener,Aut
             public void onFailed(Exception e) {
                 Log.e(TAG, "onFailed: Failed to retrieve user data", e);
                 runOnUiThread(() -> {
+                    notificationHelper.showLoginError("Failed to retrieve user data");
                     Toast.makeText(Login.this, "Failed to retrieve user data", Toast.LENGTH_LONG).show();
                     btnGoLog.setEnabled(true);
                 });
@@ -147,6 +160,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener,Aut
     public void onFailed(Exception e) {
         Log.e(TAG, "Authentication failed", e);
         runOnUiThread(() -> {
+            notificationHelper.showLoginError(e.getMessage());
             Toast.makeText(Login.this, "Authentication failed: " + e.getMessage(),
                     Toast.LENGTH_LONG).show();
             btnGoLog.setEnabled(true);
@@ -203,6 +217,9 @@ public class Login extends AppCompatActivity implements View.OnClickListener,Aut
                         SharedPreferencesUtil.saveUser(Login.this, user2);
                         
                         runOnUiThread(() -> {
+                            // Show welcome notification
+                            notificationHelper.showLoginSuccess(user2.getFname());
+                            
                             if (email.equals(admin) && password.equals(passadmin)) {
                                 Intent golog = new Intent(Login.this, AdminPage.class);
                                 isAdmin = true;
@@ -224,6 +241,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener,Aut
                             if (progressDialog.isShowing()) {
                                 progressDialog.dismiss();
                             }
+                            notificationHelper.showLoginError("Failed to retrieve user data");
                             Toast.makeText(Login.this, "Failed to retrieve user data", Toast.LENGTH_LONG).show();
                             btnGoLog.setEnabled(true);
                             // Sign out the user if failed to retrieve user data
@@ -240,6 +258,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener,Aut
                     if (progressDialog.isShowing()) {
                         progressDialog.dismiss();
                     }
+                    notificationHelper.showLoginError(e.getMessage());
                     Toast.makeText(Login.this, "Authentication failed: " + e.getMessage(),
                             Toast.LENGTH_LONG).show();
                     btnGoLog.setEnabled(true);

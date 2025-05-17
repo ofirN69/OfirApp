@@ -2,11 +2,10 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_background"
-    tools:context=".screens.Login">
+    tools:context=".screens.EditProfileActivity">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/titleCard"
@@ -20,12 +19,11 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:padding="24dp"
-            android:text="התחברות"
+            android:text="Edit Profile"
             android:textAlignment="center"
             android:textColor="#1A237E"
             android:textSize="32sp"
@@ -50,53 +48,88 @@
             android:orientation="vertical"
             android:padding="24dp">
 
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="24dp">
+
+                <ImageView
+                    android:id="@+id/ivProfilePic"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:background="@android:color/darker_gray"
+                    android:padding="16dp"
+                    android:src="@drawable/ic_person"
+                    android:scaleType="fitCenter"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnChangePhoto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|center"
+                    android:text="Change Photo"
+                    android:textSize="12sp"
+                    app:cornerRadius="12dp"
+                    android:backgroundTint="#3F51B5"
+                    style="@style/Widget.MaterialComponents.Button"/>
+            </FrameLayout>
+
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:hint="אימייל"
-                app:startIconDrawable="@drawable/ic_email"
+                android:hint="Display Name"
+                app:startIconDrawable="@drawable/ic_person"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etEmailLogin"
+                <EditText
+                    android:id="@+id/etDisplayName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textEmailAddress" />
-
+                    android:inputType="textPersonName"
+                    android:maxLines="1"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                android:hint="סיסמה"
-                app:startIconDrawable="@drawable/ic_lock"
-                app:endIconMode="password_toggle"
+                android:hint="Phone Number"
+                app:startIconDrawable="@drawable/ic_phone"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etPasswordLogin"
+                <EditText
+                    android:id="@+id/etPhone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPassword" />
-
+                    android:inputType="phone"
+                    android:maxLines="1"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnLog"
+                android:id="@+id/btnSave"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
-                android:backgroundTint="#3F51B5"
-                android:text="התחבר"
+                android:text="Save Changes"
                 android:textSize="16sp"
                 app:cornerRadius="12dp"
+                android:backgroundTint="#3F51B5"
                 android:elevation="4dp"
                 app:rippleColor="#1A237E"
-                style="@style/Widget.MaterialComponents.Button" />
+                style="@style/Widget.MaterialComponents.Button"/>
 
         </LinearLayout>
-
     </androidx.cardview.widget.CardView>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout> 
