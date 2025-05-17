@@ -2,15 +2,17 @@ package com.ofir.ofirapp.screens;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ofir.ofirapp.R;
-import com.ofir.ofirapp.adapters.SectionedEventAdapter;
+import com.ofir.ofirapp.adapters.ExpandableEventAdapter;
 import com.ofir.ofirapp.models.Event;
 import com.ofir.ofirapp.services.AuthenticationService;
 import com.ofir.ofirapp.services.DatabaseService;
@@ -20,21 +22,31 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MyEvents extends AppCompatActivity {
-
     private static final String TAG = "MyEvents";
     
     private RecyclerView recyclerView;
-    private SectionedEventAdapter eventAdapter;
-    private TextView tvNoEvents;
+    private ExpandableEventAdapter eventAdapter;
+    private CardView eventsListCard;
+    private TextView selectedCategoryTitle;
+    private TextView todayEventsCount;
+    private TextView futureEventsCount;
+    private CardView todayEventsCard;
+    private CardView futureEventsCard;
+    private ImageButton closeEventsButton;
 
     private String userId;
     private AuthenticationService authenticationService;
     private DatabaseService databaseService;
+    
+    private List<Event> allTodayEvents;
+    private List<Event> allFutureEvents;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +58,10 @@ public class MyEvents extends AppCompatActivity {
         
         // Initialize views
         initializeViews();
+
+        // Initialize event lists
+        allTodayEvents = new ArrayList<>();
+        allFutureEvents = new ArrayList<>();
 
         // Load events
         loadEvents();
@@ -63,58 +79,71 @@ public class MyEvents extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         
         // Initialize adapter
-        eventAdapter = new SectionedEventAdapter(this);
+        eventAdapter = new ExpandableEventAdapter(this);
         recyclerView.setAdapter(eventAdapter);
         
-        // Initialize no events text view
-        tvNoEvents = findViewById(R.id.tvNoEvents);
+        // Initialize cards and text views
+        eventsListCard = findViewById(R.id.eventsListCard);
+        selectedCategoryTitle = findViewById(R.id.selectedCategoryTitle);
+        todayEventsCount = findViewById(R.id.todayEventsCount);
+        futureEventsCount = findViewById(R.id.futureEventsCount);
+        todayEventsCard = findViewById(R.id.todayEventsCard);
+        futureEventsCard = findViewById(R.id.futureEventsCard);
+        closeEventsButton = findViewById(R.id.closeEventsButton);
+
+        // Set click listeners
+        todayEventsCard.setOnClickListener(v -> showCategoryEvents("Today's Events", allTodayEvents));
+        futureEventsCard.setOnClickListener(v -> showCategoryEvents("Future Events", allFutureEvents));
+        closeEventsButton.setOnClickListener(v -> hideEventsList());
     }
 
     private void loadEvents() {
+        if (databaseService == null || userId == null) {
+            Toast.makeText(this, "Error: Services not initialized properly", Toast.LENGTH_SHORT).show();
+            updateEventCounts(0, 0);
+            return;
+        }
+
         databaseService.getUserEvents(userId, new DatabaseService.DatabaseCallback<List<Event>>() {
             @Override
             public void onCompleted(List<Event> events) {
                 runOnUiThread(() -> {
+                    if (events == null) {
+                        Toast.makeText(MyEvents.this, "No events found", Toast.LENGTH_SHORT).show();
+                        updateEventCounts(0, 0);
+                        return;
+                    }
+
                     // Filter out hidden events
                     List<Event> visibleEvents = events.stream()
-                        .filter(event -> !SectionedEventAdapter.isEventHidden(MyEvents.this, event.getId()))
+                        .filter(event -> event != null && event.getId() != null)
+                        .filter(event -> !ExpandableEventAdapter.isEventHidden(MyEvents.this, event.getId()))
                         .collect(Collectors.toList());
 
-                    updateEventsDisplay(visibleEvents);
+                    categorizeEvents(visibleEvents);
                 });
             }
 
             @Override
             public void onFailed(Exception e) {
                 runOnUiThread(() -> {
-                    Toast.makeText(MyEvents.this, "Failed to load events: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    showNoEventsView();
+                    String errorMessage = e != null ? e.getMessage() : "Unknown error";
+                    Toast.makeText(MyEvents.this, "Failed to load events: " + errorMessage, Toast.LENGTH_SHORT).show();
+                    updateEventCounts(0, 0);
                 });
             }
         });
     }
 
-    private void updateEventsDisplay(List<Event> visibleEvents) {
-        if (visibleEvents.isEmpty()) {
-            showNoEventsView();
+    private void categorizeEvents(List<Event> events) {
+        if (events == null) {
+            updateEventCounts(0, 0);
             return;
         }
 
-        showEventsView();
-        categorizeAndDisplayEvents(visibleEvents);
-    }
+        allTodayEvents.clear();
+        allFutureEvents.clear();
 
-    private void showNoEventsView() {
-        recyclerView.setVisibility(View.GONE);
-        tvNoEvents.setVisibility(View.VISIBLE);
-    }
-
-    private void showEventsView() {
-        recyclerView.setVisibility(View.VISIBLE);
-        tvNoEvents.setVisibility(View.GONE);
-    }
-
-    private void categorizeAndDisplayEvents(List<Event> events) {
         // Get today's start and end
         Calendar calendar = Calendar.getInstance();
         setCalendarToStartOfDay(calendar);
@@ -123,22 +152,41 @@ public class MyEvents extends AppCompatActivity {
         setCalendarToEndOfDay(calendar);
         Date endOfToday = calendar.getTime();
 
-        // Sort events into time categories
-        List<Event> futureEvents = new ArrayList<>();
-        List<Event> todayEvents = new ArrayList<>();
-        List<Event> pastEvents = new ArrayList<>();
-
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         dateFormat.setLenient(false);
 
-        // Categorize events by time
+        // Categorize events
         for (Event event : events) {
-            categorizeEvent(event, dateFormat, startOfToday, endOfToday, futureEvents, todayEvents, pastEvents);
+            if (event == null || event.getDate() == null) {
+                continue;
+            }
+            
+            try {
+                Date eventDate = dateFormat.parse(event.getDate());
+                if (eventDate != null) {
+                    // Set time to noon to avoid timezone issues
+                    Calendar eventCalendar = Calendar.getInstance();
+                    eventCalendar.setTime(eventDate);
+                    eventCalendar.set(Calendar.HOUR_OF_DAY, 12);
+                    eventCalendar.set(Calendar.MINUTE, 0);
+                    eventCalendar.set(Calendar.SECOND, 0);
+                    eventCalendar.set(Calendar.MILLISECOND, 0);
+                    eventDate = eventCalendar.getTime();
+
+                    if (!eventDate.before(startOfToday) && !eventDate.after(endOfToday)) {
+                        allTodayEvents.add(event);
+                    } else if (eventDate.after(endOfToday)) {
+                        allFutureEvents.add(event);
+                    }
+                }
+            } catch (ParseException e) {
+                // If date parsing fails, add to future events
+                allFutureEvents.add(event);
+            }
         }
 
-        // Clear adapter and add sections
-        eventAdapter.clearItems();
-        addEventSections(futureEvents, todayEvents, pastEvents);
+        // Update counts
+        updateEventCounts(allTodayEvents.size(), allFutureEvents.size());
     }
 
     private void setCalendarToStartOfDay(Calendar calendar) {
@@ -155,70 +203,24 @@ public class MyEvents extends AppCompatActivity {
         calendar.set(Calendar.MILLISECOND, 999);
     }
 
-    private void categorizeEvent(Event event, SimpleDateFormat dateFormat, Date startOfToday, Date endOfToday,
-                               List<Event> futureEvents, List<Event> todayEvents, List<Event> pastEvents) {
-        try {
-            Date eventDate = dateFormat.parse(event.getDate());
-            if (eventDate != null) {
-                // Set time to noon to avoid timezone issues
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(eventDate);
-                calendar.set(Calendar.HOUR_OF_DAY, 12);
-                calendar.set(Calendar.MINUTE, 0);
-                calendar.set(Calendar.SECOND, 0);
-                calendar.set(Calendar.MILLISECOND, 0);
-                eventDate = calendar.getTime();
-
-                if (eventDate.before(startOfToday)) {
-                    pastEvents.add(event);
-                } else if (!eventDate.before(startOfToday) && !eventDate.after(endOfToday)) {
-                    todayEvents.add(event);
-                } else {
-                    futureEvents.add(event);
-                }
-            }
-        } catch (ParseException e) {
-            // If date parsing fails, add to future events
-            futureEvents.add(event);
-        }
+    private void updateEventCounts(int todayCount, int futureCount) {
+        todayEventsCount.setText(todayCount + " Events");
+        futureEventsCount.setText(futureCount + " Events");
     }
 
-    private void addEventSections(List<Event> futureEvents, List<Event> todayEvents, List<Event> pastEvents) {
-        // Add Future Events section
-        if (!futureEvents.isEmpty()) {
-            addEventSection("Future Events", futureEvents);
+    private void showCategoryEvents(String categoryTitle, List<Event> events) {
+        if (events == null) {
+            Toast.makeText(this, "No events available", Toast.LENGTH_SHORT).show();
+            return;
         }
-
-        // Add Today's Events section
-        if (!todayEvents.isEmpty()) {
-            addEventSection("Today's Events", todayEvents);
-        }
-
-        // Add Past Events section
-        if (!pastEvents.isEmpty()) {
-            addEventSection("Past Events", pastEvents);
-        }
-    }
-
-    private void addEventSection(String sectionTitle, List<Event> events) {
-        eventAdapter.addSection(sectionTitle);
         
-        // Add owned events
-        List<Event> ownedEvents = events.stream()
-            .filter(event -> event.getOwnerId() != null && event.getOwnerId().equals(userId))
-            .collect(Collectors.toList());
-        if (!ownedEvents.isEmpty()) {
-            eventAdapter.addSection("Events I Own");
-            eventAdapter.addEvents(ownedEvents);
-        }
+        selectedCategoryTitle.setText(categoryTitle != null ? categoryTitle : "Events");
+        eventAdapter.clearItems();
+        eventAdapter.addEvents(events);
+        eventsListCard.setVisibility(View.VISIBLE);
+    }
 
-        // Add invited events
-        List<Event> invitedEvents = events.stream()
-            .filter(event -> event.getOwnerId() == null || !event.getOwnerId().equals(userId))
-            .collect(Collectors.toList());
-        if (!invitedEvents.isEmpty()) {
-            eventAdapter.addSection("Events I'm Invited To");
-            eventAdapter.addEvents(invitedEvents);
-        }
+    private void hideEventsList() {
+        eventsListCard.setVisibility(View.GONE);
     }
 }
