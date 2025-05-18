@@ -39,8 +39,8 @@ public class addEVENT extends BaseActivity implements AdapterView.OnItemSelected
     private ListView lvMembers, lvSelectedMembers;
 
     // Adapters
-    private UserNamAdapter<User> availableUsersAdapter;
-    private UserNamAdapter<User> selectedUsersAdapter;
+    private UserNamAdapter availableUsersAdapter;
+    private UserNamAdapter selectedUsersAdapter;
 
     // Data
     private DatabaseService databaseService;
@@ -107,8 +107,8 @@ public class addEVENT extends BaseActivity implements AdapterView.OnItemSelected
         lvSelectedMembers = findViewById(R.id.lvSelected);
 
         // Setup adapters
-        availableUsersAdapter = new UserNamAdapter<>(this, 0, 0, availableUsers);
-        selectedUsersAdapter = new UserNamAdapter<>(this, 0, 0, selectedUsers);
+        availableUsersAdapter = new UserNamAdapter(this, 0, 0, availableUsers);
+        selectedUsersAdapter = new UserNamAdapter(this, 0, 0, selectedUsers);
 
         lvMembers.setAdapter(availableUsersAdapter);
         lvSelectedMembers.setAdapter(selectedUsersAdapter);
@@ -137,6 +137,7 @@ public class addEVENT extends BaseActivity implements AdapterView.OnItemSelected
             if (!isUserAlreadySelected(selectedUser)) {
                 selectedUsers.add(selectedUser);
                 selectedUsersAdapter.notifyDataSetChanged();
+                availableUsersAdapter.notifyDataSetChanged();
             } else {
                 Toast.makeText(addEVENT.this, "User already added to event", Toast.LENGTH_SHORT).show();
             }
@@ -145,10 +146,11 @@ public class addEVENT extends BaseActivity implements AdapterView.OnItemSelected
         lvSelectedMembers.setOnItemClickListener((parent, view, position, id) -> {
             selectedUsers.remove(position);
             selectedUsersAdapter.notifyDataSetChanged();
+            availableUsersAdapter.notifyDataSetChanged();
         });
     }
 
-    private boolean isUserAlreadySelected(User user) {
+    public boolean isUserAlreadySelected(User user) {
         for (User selectedUser : selectedUsers) {
             if (selectedUser.getId().equals(user.getId())) {
                 return true;
@@ -162,7 +164,11 @@ public class addEVENT extends BaseActivity implements AdapterView.OnItemSelected
             @Override
             public void onCompleted(List<User> users) {
                 availableUsers.clear();
-                availableUsers.addAll(users);
+                for (User user : users) {
+                    if (!user.getId().equals(uid)) {
+                        availableUsers.add(user);
+                    }
+                }
                 availableUsersAdapter.notifyDataSetChanged();
             }
 

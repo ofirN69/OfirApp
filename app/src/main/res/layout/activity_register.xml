@@ -165,4 +165,21 @@
 
     </androidx.cardview.widget.CardView>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginBottom="24dp"
+        android:text="חזור"
+        android:textSize="16sp"
+        android:backgroundTint="#757575"
+        app:cornerRadius="12dp"
+        android:elevation="4dp"
+        app:rippleColor="#616161"
+        android:onClick="onBackClick"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        style="@style/Widget.MaterialComponents.Button" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

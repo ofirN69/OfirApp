@@ -177,4 +177,9 @@ public class Register extends AppCompatActivity implements AdapterView.OnItemSel
         // Show a confirmation toast
         Toast.makeText(Register.this, "כל השדות נוקו", Toast.LENGTH_SHORT).show();
     }
+
+    public void onBackClick(View v) {
+        // Simply finish the activity to return to the previous screen
+        finish();
+    }
 }

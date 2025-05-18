@@ -54,6 +54,9 @@
         <activity
             android:name=".screens.EditProfileActivity"
             android:exported="false" />
+        <activity
+            android:name=".screens.ChangePasswordActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

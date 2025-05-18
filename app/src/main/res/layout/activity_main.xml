@@ -8,30 +8,31 @@
     android:background="@drawable/gradient_background"
     tools:context=".screens.MainActivity">
 
+    <!-- Title Container -->
     <androidx.cardview.widget.CardView
-        android:id="@+id/titleCard"
+        android:id="@+id/titleContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="80dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="12dp"
         app:cardBackgroundColor="#FFFFFF"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="8dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
             android:orientation="horizontal"
-            android:padding="24dp">
+            android:gravity="center"
+            android:padding="16dp">
 
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_marginEnd="12dp"
-                android:src="@drawable/house3" />
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/house3"
+                app:tint="#3F51B5"/>
 
             <TextView
                 android:id="@+id/tvTitle"
@@ -39,40 +40,43 @@
                 android:layout_height="wrap_content"
                 android:text="מסך בית"
                 android:textAlignment="center"
-                android:textColor="#1A237E"
-                android:textSize="28sp"
+                android:textColor="#3F51B5"
+                android:textSize="32sp"
                 android:textStyle="bold"
-                android:fontFamily="sans-serif-medium" />
-
+                android:fontFamily="sans-serif-medium"/>
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
 
+    <!-- Buttons Card -->
     <androidx.cardview.widget.CardView
+        android:id="@+id/buttonsCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="32dp"
         app:cardBackgroundColor="#FFFFFF"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="8dp"
-        app:layout_constraintTop_toBottomOf="@id/titleCard">
+        app:cardCornerRadius="20dp"
+        app:cardElevation="12dp"
+        app:layout_constraintTop_toBottomOf="@id/titleContainer"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="100dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="24dp">
+            android:padding="32dp">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnGoRegister"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:layout_marginBottom="16dp"
+                android:layout_height="65dp"
+                android:layout_marginBottom="24dp"
                 android:backgroundTint="#3F51B5"
                 android:text="הרשם"
-                android:textSize="16sp"
-                app:cornerRadius="12dp"
+                android:textSize="20sp"
+                app:cornerRadius="15dp"
                 android:elevation="4dp"
                 app:rippleColor="#1A237E"
                 style="@style/Widget.MaterialComponents.Button" />
@@ -80,11 +84,11 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnGoLogin"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="65dp"
                 android:backgroundTint="#5C6BC0"
                 android:text="התחבר"
-                android:textSize="16sp"
-                app:cornerRadius="12dp"
+                android:textSize="20sp"
+                app:cornerRadius="15dp"
                 android:elevation="4dp"
                 app:rippleColor="#1A237E"
                 style="@style/Widget.MaterialComponents.Button" />

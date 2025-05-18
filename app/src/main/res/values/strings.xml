@@ -1,4 +1,17 @@
 <resources>
     <string name="app_name">OfirApp</string>
     <string name="title_activity_my_events">MyEvents</string>
+    
+    <!-- Event Details Activity -->
+    <string name="event_type_format">Event Type: %1$s</string>
+    <string name="event_date_format">Date: %1$s</string>
+    <string name="event_venue_format">Venue: %1$s</string>
+    <string name="event_address_format">Address: %1$s</string>
+    <string name="event_city_format">City: %1$s</string>
+    <string name="event_dress_code_format">Dress Code: %1$s</string>
+    <string name="event_menu_type_format">Menu Type: %1$s</string>
+    <string name="event_is_today">Event is Today!</string>
+    <string name="invalid_date_format">Invalid Date</string>
+    <string name="event_has_passed">Event has passed</string>
+    <string name="countdown_format">%1$d days, %2$d hours, %3$d minutes until event</string>
 </resources>

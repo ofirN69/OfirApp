@@ -140,8 +140,7 @@ public class AccPage extends BaseActivity implements View.OnClickListener {
         if (v == btnEditProfile) {
             startActivity(new Intent(this, EditProfileActivity.class));
         } else if (v == btnChangePassword) {
-            // TODO: Implement change password functionality
-            Toast.makeText(this, "Change password functionality coming soon", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, ChangePasswordActivity.class));
         } else if (v == btnLogout) {
             authenticationService.signOut();
             // Clear user data from SharedPreferences
