@@ -6,7 +6,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -28,7 +27,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class MyEvents extends AppCompatActivity {
+public class MyEvents extends BaseActivity {
     private static final String TAG = "MyEvents";
     
     private RecyclerView recyclerView;
@@ -37,9 +36,12 @@ public class MyEvents extends AppCompatActivity {
     private TextView selectedCategoryTitle;
     private TextView todayEventsCount;
     private TextView futureEventsCount;
+    private TextView pastEventsCount;
     private CardView todayEventsCard;
     private CardView futureEventsCard;
+    private CardView pastEventsCard;
     private ImageButton closeEventsButton;
+    private TextView noCategoryText;
 
     private String userId;
     private AuthenticationService authenticationService;
@@ -47,6 +49,7 @@ public class MyEvents extends AppCompatActivity {
     
     private List<Event> allTodayEvents;
     private List<Event> allFutureEvents;
+    private List<Event> allPastEvents;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,9 +65,12 @@ public class MyEvents extends AppCompatActivity {
         // Initialize event lists
         allTodayEvents = new ArrayList<>();
         allFutureEvents = new ArrayList<>();
+        allPastEvents = new ArrayList<>();
 
         // Load events
         loadEvents();
+        
+        setActionBarTitle("My Events");
     }
 
     private void initializeServices() {
@@ -87,20 +93,24 @@ public class MyEvents extends AppCompatActivity {
         selectedCategoryTitle = findViewById(R.id.selectedCategoryTitle);
         todayEventsCount = findViewById(R.id.todayEventsCount);
         futureEventsCount = findViewById(R.id.futureEventsCount);
+        pastEventsCount = findViewById(R.id.pastEventsCount);
         todayEventsCard = findViewById(R.id.todayEventsCard);
         futureEventsCard = findViewById(R.id.futureEventsCard);
+        pastEventsCard = findViewById(R.id.pastEventsCard);
         closeEventsButton = findViewById(R.id.closeEventsButton);
+        noCategoryText = findViewById(R.id.noCategoryText);
 
         // Set click listeners
         todayEventsCard.setOnClickListener(v -> showCategoryEvents("Today's Events", allTodayEvents));
         futureEventsCard.setOnClickListener(v -> showCategoryEvents("Future Events", allFutureEvents));
+        pastEventsCard.setOnClickListener(v -> showCategoryEvents("Past Events", allPastEvents));
         closeEventsButton.setOnClickListener(v -> hideEventsList());
     }
 
     private void loadEvents() {
         if (databaseService == null || userId == null) {
             Toast.makeText(this, "Error: Services not initialized properly", Toast.LENGTH_SHORT).show();
-            updateEventCounts(0, 0);
+            updateEventCounts(0, 0, 0);
             return;
         }
 
@@ -110,7 +120,7 @@ public class MyEvents extends AppCompatActivity {
                 runOnUiThread(() -> {
                     if (events == null) {
                         Toast.makeText(MyEvents.this, "No events found", Toast.LENGTH_SHORT).show();
-                        updateEventCounts(0, 0);
+                        updateEventCounts(0, 0, 0);
                         return;
                     }
 
@@ -129,7 +139,7 @@ public class MyEvents extends AppCompatActivity {
                 runOnUiThread(() -> {
                     String errorMessage = e != null ? e.getMessage() : "Unknown error";
                     Toast.makeText(MyEvents.this, "Failed to load events: " + errorMessage, Toast.LENGTH_SHORT).show();
-                    updateEventCounts(0, 0);
+                    updateEventCounts(0, 0, 0);
                 });
             }
         });
@@ -137,12 +147,13 @@ public class MyEvents extends AppCompatActivity {
 
     private void categorizeEvents(List<Event> events) {
         if (events == null) {
-            updateEventCounts(0, 0);
+            updateEventCounts(0, 0, 0);
             return;
         }
 
         allTodayEvents.clear();
         allFutureEvents.clear();
+        allPastEvents.clear();
 
         // Get today's start and end
         Calendar calendar = Calendar.getInstance();
@@ -177,6 +188,8 @@ public class MyEvents extends AppCompatActivity {
                         allTodayEvents.add(event);
                     } else if (eventDate.after(endOfToday)) {
                         allFutureEvents.add(event);
+                    } else {
+                        allPastEvents.add(event);
                     }
                 }
             } catch (ParseException e) {
@@ -186,7 +199,7 @@ public class MyEvents extends AppCompatActivity {
         }
 
         // Update counts
-        updateEventCounts(allTodayEvents.size(), allFutureEvents.size());
+        updateEventCounts(allTodayEvents.size(), allFutureEvents.size(), allPastEvents.size());
     }
 
     private void setCalendarToStartOfDay(Calendar calendar) {
@@ -203,9 +216,10 @@ public class MyEvents extends AppCompatActivity {
         calendar.set(Calendar.MILLISECOND, 999);
     }
 
-    private void updateEventCounts(int todayCount, int futureCount) {
-        todayEventsCount.setText(todayCount + " Events");
-        futureEventsCount.setText(futureCount + " Events");
+    private void updateEventCounts(int todayCount, int futureCount, int pastCount) {
+        todayEventsCount.setText("Today's Events: " + todayCount);
+        futureEventsCount.setText("Future Events: " + futureCount);
+        pastEventsCount.setText("Past Events: " + pastCount);
     }
 
     private void showCategoryEvents(String categoryTitle, List<Event> events) {
@@ -218,9 +232,11 @@ public class MyEvents extends AppCompatActivity {
         eventAdapter.clearItems();
         eventAdapter.addEvents(events);
         eventsListCard.setVisibility(View.VISIBLE);
+        noCategoryText.setVisibility(View.GONE);
     }
 
     private void hideEventsList() {
         eventsListCard.setVisibility(View.GONE);
+        noCategoryText.setVisibility(View.VISIBLE);
     }
 }

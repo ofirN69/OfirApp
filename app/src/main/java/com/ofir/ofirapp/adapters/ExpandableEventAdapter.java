@@ -3,6 +3,7 @@ package com.ofir.ofirapp.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -120,13 +121,32 @@ public class ExpandableEventAdapter extends RecyclerView.Adapter<ExpandableEvent
     }
 
     private void hideEvent(String eventId, int position) {
-        Set<String> hiddenEvents = preferences.getStringSet(PREF_HIDDEN_EVENTS, new HashSet<>());
-        Set<String> newHiddenEvents = new HashSet<>(hiddenEvents);
-        newHiddenEvents.add(eventId);
-        preferences.edit().putStringSet(PREF_HIDDEN_EVENTS, newHiddenEvents).apply();
-        
-        events.remove(position);
-        notifyItemRemoved(position);
+        if (eventId == null || position < 0 || position >= events.size()) {
+            return;
+        }
+
+        try {
+            // Get current hidden events
+            Set<String> hiddenEvents = preferences.getStringSet(PREF_HIDDEN_EVENTS, new HashSet<>());
+            Set<String> newHiddenEvents = new HashSet<>(hiddenEvents);
+            
+            // Add the event to hidden set
+            newHiddenEvents.add(eventId);
+            
+            // Apply changes to SharedPreferences
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putStringSet(PREF_HIDDEN_EVENTS, newHiddenEvents);
+            editor.apply();
+            
+            // Remove from adapter's list
+            if (position < events.size()) {
+                events.remove(position);
+                notifyItemRemoved(position);
+            }
+        } catch (Exception e) {
+            // Log error but don't crash
+            Log.e("ExpandableEventAdapter", "Error hiding event: " + e.getMessage());
+        }
     }
 
     public static boolean isEventHidden(Context context, String eventId) {

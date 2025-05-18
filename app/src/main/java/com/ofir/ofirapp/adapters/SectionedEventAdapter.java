@@ -3,6 +3,7 @@ package com.ofir.ofirapp.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -127,20 +128,39 @@ public class SectionedEventAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     }
 
     private void hideEvent(String eventId, int position) {
-        Set<String> hiddenEvents = preferences.getStringSet(PREF_HIDDEN_EVENTS, new HashSet<>());
-        Set<String> newHiddenEvents = new HashSet<>(hiddenEvents);
-        newHiddenEvents.add(eventId);
-        preferences.edit().putStringSet(PREF_HIDDEN_EVENTS, newHiddenEvents).apply();
-        
-        items.remove(position);
-        notifyItemRemoved(position);
-        
-        // Remove section header if this was the last event in the section
-        if (position > 0 && position < items.size() && 
-            items.get(position - 1) instanceof String && 
-            (position == items.size() || items.get(position) instanceof String)) {
-            items.remove(position - 1);
-            notifyItemRemoved(position - 1);
+        if (eventId == null || position < 0 || position >= items.size()) {
+            return;
+        }
+
+        try {
+            // Get current hidden events
+            Set<String> hiddenEvents = preferences.getStringSet(PREF_HIDDEN_EVENTS, new HashSet<>());
+            Set<String> newHiddenEvents = new HashSet<>(hiddenEvents);
+            
+            // Add the event to hidden set
+            newHiddenEvents.add(eventId);
+            
+            // Apply changes to SharedPreferences
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putStringSet(PREF_HIDDEN_EVENTS, newHiddenEvents);
+            editor.apply();
+            
+            // Remove from adapter's list
+            if (position < items.size()) {
+                items.remove(position);
+                notifyItemRemoved(position);
+                
+                // Remove section header if this was the last event in the section
+                if (position > 0 && position < items.size() && 
+                    items.get(position - 1) instanceof String && 
+                    (position == items.size() || items.get(position) instanceof String)) {
+                    items.remove(position - 1);
+                    notifyItemRemoved(position - 1);
+                }
+            }
+        } catch (Exception e) {
+            // Log error but don't crash
+            Log.e("SectionedEventAdapter", "Error hiding event: " + e.getMessage());
         }
     }
 

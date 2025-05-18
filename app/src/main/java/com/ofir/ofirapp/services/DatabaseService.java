@@ -206,16 +206,69 @@ public class DatabaseService {
         });
     }
 
-    // Remove an event from the main events collection
+    // Remove an event from the main events collection and all related references
     public void removeEvent(@NonNull final String eventId, @Nullable final DatabaseCallback<Void> callback) {
-        databaseReference.child("events").child(eventId).removeValue()
-            .addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    if (callback != null) callback.onCompleted(null);
-                } else {
-                    if (callback != null) callback.onFailed(task.getException());
+        // First get the event to check its owner and users
+        getEvent(eventId, new DatabaseCallback<Event>() {
+            @Override
+            public void onCompleted(Event event) {
+                if (event == null) {
+                    if (callback != null) callback.onFailed(new Exception("Event not found"));
+                    return;
                 }
-            });
+
+                // Create a map of all paths to delete
+                java.util.Map<String, Object> deleteUpdates = new java.util.HashMap<>();
+                
+                // Remove from main events collection
+                deleteUpdates.put("events/" + eventId, null);
+                
+                // Remove from owner's events
+                if (event.getOwnerId() != null) {
+                    deleteUpdates.put("userEvents/" + event.getOwnerId() + "/myEvents/" + eventId, null);
+                }
+
+                // Get all users of the event and remove from their lists
+                getSelectedUsersForEvent(eventId, new DatabaseCallback<List<User>>() {
+                    @Override
+                    public void onCompleted(List<User> users) {
+                        if (users != null) {
+                            for (User user : users) {
+                                deleteUpdates.put("userEvents/" + user.getId() + "/myEvents/" + eventId, null);
+                            }
+                        }
+                        
+                        // Perform all deletions in a single update
+                        databaseReference.updateChildren(deleteUpdates)
+                            .addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    if (callback != null) callback.onCompleted(null);
+                                } else {
+                                    if (callback != null) callback.onFailed(task.getException());
+                                }
+                            });
+                    }
+
+                    @Override
+                    public void onFailed(Exception e) {
+                        // If we can't get users, still try to delete the event
+                        databaseReference.updateChildren(deleteUpdates)
+                            .addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    if (callback != null) callback.onCompleted(null);
+                                } else {
+                                    if (callback != null) callback.onFailed(task.getException());
+                                }
+                            });
+                    }
+                });
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+                if (callback != null) callback.onFailed(e);
+            }
+        });
     }
 
     // Remove an event from a user's events list
@@ -228,6 +281,59 @@ public class DatabaseService {
                     if (callback != null) callback.onFailed(task.getException());
                 }
             });
+    }
+
+    // Remove an event from all users' events lists
+    public void removeEventFromAllUsers(@NonNull final String eventId, @Nullable final DatabaseCallback<Void> callback) {
+        // First get all users
+        getUsers(new DatabaseCallback<List<User>>() {
+            @Override
+            public void onCompleted(List<User> users) {
+                if (users == null || users.isEmpty()) {
+                    if (callback != null) callback.onCompleted(null);
+                    return;
+                }
+
+                // Keep track of completed operations
+                final int[] completedCount = {0};
+                final Exception[] lastError = {null};
+
+                // Remove event from each user's list
+                for (User user : users) {
+                    removeEventFromUser(user.getId(), eventId, new DatabaseCallback<Void>() {
+                        @Override
+                        public void onCompleted(Void object) {
+                            completedCount[0]++;
+                            checkCompletion();
+                        }
+
+                        @Override
+                        public void onFailed(Exception e) {
+                            completedCount[0]++;
+                            lastError[0] = e;
+                            checkCompletion();
+                        }
+
+                        private void checkCompletion() {
+                            if (completedCount[0] == users.size()) {
+                                if (callback != null) {
+                                    if (lastError[0] != null) {
+                                        callback.onFailed(lastError[0]);
+                                    } else {
+                                        callback.onCompleted(null);
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailed(Exception e) {
+                if (callback != null) callback.onFailed(e);
+            }
+        });
     }
 
     public void updateUser(User user, DatabaseCallback<Void> callback) {

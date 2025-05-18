@@ -99,12 +99,13 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/passwordLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:hint="סיסמא"
-                app:startIconDrawable="@drawable/ic_lock"
-                app:endIconMode="password_toggle"
+                app:startIconDrawable="@drawable/password_visibility_selector"
+                app:startIconCheckable="true"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -142,6 +143,22 @@
                 app:cornerRadius="12dp"
                 android:elevation="4dp"
                 app:rippleColor="#1A237E"
+                style="@style/Widget.MaterialComponents.Button" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnClearAll"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="16dp"
+                android:backgroundTint="#757575"
+                android:text="נקה הכל"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:onClick="onClearAllClick"
+                app:cornerRadius="12dp"
+                android:elevation="4dp"
+                app:rippleColor="#616161"
                 style="@style/Widget.MaterialComponents.Button" />
 
         </LinearLayout>

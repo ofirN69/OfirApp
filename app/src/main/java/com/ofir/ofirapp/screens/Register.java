@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -12,7 +13,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,17 +20,14 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.textfield.TextInputLayout;
 import com.ofir.ofirapp.R;
 import com.ofir.ofirapp.models.User;
 import com.ofir.ofirapp.services.AuthenticationService;
 import com.ofir.ofirapp.services.DatabaseService;
 import com.ofir.ofirapp.utils.SharedPreferencesUtil;
 
-
 public class Register extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
-
-
-
 
     private static final String TAG = "RegisterActivity";
     EditText etFName, etLName, etPhone, etEmail, etPass;
@@ -40,7 +37,6 @@ public class Register extends AppCompatActivity implements AdapterView.OnItemSel
 
     AuthenticationService authenticationService;
     DatabaseService databaseService;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +52,6 @@ public class Register extends AppCompatActivity implements AdapterView.OnItemSel
 
         authenticationService = AuthenticationService.getInstance();
         databaseService = DatabaseService.getInstance();
-
     }
 
     private void init_views() {
@@ -67,6 +62,19 @@ public class Register extends AppCompatActivity implements AdapterView.OnItemSel
         etEmail = findViewById(R.id.etEmail);
         etPass = findViewById(R.id.etPassword);
 
+        TextInputLayout passwordLayout = findViewById(R.id.passwordLayout);
+        final boolean[] isPasswordVisible = {false};
+        passwordLayout.setStartIconOnClickListener(v -> {
+            isPasswordVisible[0] = !isPasswordVisible[0];
+            // Update the icon
+            passwordLayout.setStartIconDrawable(isPasswordVisible[0] ? 
+                R.drawable.ic_visibility_off : R.drawable.ic_visibility);
+            // Update the input type
+            etPass.setTransformationMethod(isPasswordVisible[0] ? 
+                null : PasswordTransformationMethod.getInstance());
+
+            etPass.setSelection(etPass.getText().length());
+        });
     }
 
     public void onClick(View v) {
@@ -76,11 +84,9 @@ public class Register extends AppCompatActivity implements AdapterView.OnItemSel
         email = etEmail.getText().toString();
         pass = etPass.getText().toString();
 
-
         //check if registration is valid
         Boolean isValid = true;
         if (fName.length() < 2) {
-
             etFName.setError("שם פרטי קצר מדי");
             isValid = false;
         }
@@ -118,24 +124,15 @@ public class Register extends AppCompatActivity implements AdapterView.OnItemSel
                 databaseService.createNewUser(newUser, new DatabaseService.DatabaseCallback<Void>() {
                     @Override
                     public void onCompleted(Void object) {
-
-
-
                         Log.d(TAG, "onCompleted: User registered successfully");
                         /// save the user to shared preferences
-
                         SharedPreferencesUtil.saveUser(Register.this, newUser);
-
-
 
                         Log.d(TAG, "onCompleted: Redirecting to MainActivity");
                         /// Redirect to MainActivity and clear back stack to prevent user from going back to register screen
                         Intent mainIntent = new Intent(Register.this, MainActivity.class);
                         /// clear the back stack (clear history) and start the MainActivity
                         mainIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(mainIntent);
-
-
                         startActivity(mainIntent);
                     }
 
@@ -147,7 +144,6 @@ public class Register extends AppCompatActivity implements AdapterView.OnItemSel
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
-
             }
 
             @Override
@@ -168,5 +164,17 @@ public class Register extends AppCompatActivity implements AdapterView.OnItemSel
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
 
+    }
+
+    public void onClearAllClick(View v) {
+        // Clear all EditText fields
+        etFName.setText("");
+        etLName.setText("");
+        etPhone.setText("");
+        etEmail.setText("");
+        etPass.setText("");
+
+        // Show a confirmation toast
+        Toast.makeText(Register.this, "כל השדות נוקו", Toast.LENGTH_SHORT).show();
     }
 }

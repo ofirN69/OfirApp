@@ -7,7 +7,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -16,7 +15,7 @@ import com.ofir.ofirapp.R;
 import com.ofir.ofirapp.models.User;
 import com.ofir.ofirapp.utils.SharedPreferencesUtil;
 
-public class AfterLogPage extends AppCompatActivity implements View.OnClickListener {
+public class AfterLogPage extends BaseActivity implements View.OnClickListener {
 
     TextView tvHello;
     Button MyEvents , Add, Info;
@@ -30,13 +29,14 @@ public class AfterLogPage extends AppCompatActivity implements View.OnClickListe
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
-
         });
         initviews();
         User user=SharedPreferencesUtil.getUser(this);
 
         tvHello = findViewById(R.id.tv_hello);
         tvHello.setText("Hello " + user.getFname() + " welcome to the app");
+        
+        setActionBarTitle("Home");
     }
 
     private void initviews() {
@@ -64,15 +64,4 @@ public class AfterLogPage extends AppCompatActivity implements View.OnClickListe
             startActivity(goInfo);
         }
     }
-
-
-
-
-
-
-
-
-
-
-
 }

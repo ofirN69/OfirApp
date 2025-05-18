@@ -7,23 +7,30 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
 import com.ofir.ofirapp.R;
+import com.ofir.ofirapp.adapters.OwnedEventAdapter;
 import com.ofir.ofirapp.models.User;
 import com.ofir.ofirapp.models.Event;
 import com.ofir.ofirapp.services.AuthenticationService;
 import com.ofir.ofirapp.services.DatabaseService;
 import com.ofir.ofirapp.utils.SharedPreferencesUtil;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class AccPage extends AppCompatActivity implements View.OnClickListener {
+public class AccPage extends BaseActivity implements View.OnClickListener {
     private TextView tvEmail, tvPhone, tvDisplayName, tvEventCount;
     private MaterialButton btnEditProfile, btnChangePassword, btnLogout;
     private ImageView ivProfilePic;
+    private RecyclerView rvOwnedEvents;
+    private OwnedEventAdapter ownedEventAdapter;
+    
     private User currentUser;
     private DatabaseService databaseService;
     private AuthenticationService authenticationService;
@@ -47,6 +54,8 @@ public class AccPage extends AppCompatActivity implements View.OnClickListener {
 
         // Load user data
         loadUserData();
+        
+        setActionBarTitle("My Account");
     }
 
     @Override
@@ -65,6 +74,12 @@ public class AccPage extends AppCompatActivity implements View.OnClickListener {
         btnChangePassword = findViewById(R.id.btnChangePassword);
         btnLogout = findViewById(R.id.btnLogout);
         ivProfilePic = findViewById(R.id.ivProfilePic);
+        
+        // Initialize RecyclerView for owned events
+        rvOwnedEvents = findViewById(R.id.rvOwnedEvents);
+        rvOwnedEvents.setLayoutManager(new LinearLayoutManager(this));
+        ownedEventAdapter = new OwnedEventAdapter(this);
+        rvOwnedEvents.setAdapter(ownedEventAdapter);
     }
 
     private void loadUserData() {
@@ -75,7 +90,7 @@ public class AccPage extends AppCompatActivity implements View.OnClickListener {
             tvEmail.setText(currentUser.getEmail());
             tvPhone.setText(currentUser.getPhone() != null ? currentUser.getPhone() : "No phone number");
 
-            // Load user's events count
+            // Load user's events
             loadUserEvents();
         } else {
             // Handle case where user data is not available
@@ -89,7 +104,23 @@ public class AccPage extends AppCompatActivity implements View.OnClickListener {
             @Override
             public void onCompleted(List<Event> events) {
                 runOnUiThread(() -> {
-                    tvEventCount.setText("Events: " + events.size());
+                    if (events != null) {
+                        // Filter owned events
+                        List<Event> ownedEvents = events.stream()
+                            .filter(event -> event != null && 
+                                   event.getOwnerId() != null && 
+                                   event.getOwnerId().equals(currentUser.getId()))
+                            .collect(Collectors.toList());
+                        
+                        // Update owned events list
+                        ownedEventAdapter.setEvents(ownedEvents);
+                        
+                        // Update total events count
+                        tvEventCount.setText("Events: " + events.size());
+                    } else {
+                        tvEventCount.setText("Events: 0");
+                        ownedEventAdapter.clearItems();
+                    }
                 });
             }
 
@@ -97,6 +128,7 @@ public class AccPage extends AppCompatActivity implements View.OnClickListener {
             public void onFailed(Exception e) {
                 runOnUiThread(() -> {
                     tvEventCount.setText("Events: 0");
+                    ownedEventAdapter.clearItems();
                     Toast.makeText(AccPage.this, "Failed to load events", Toast.LENGTH_SHORT).show();
                 });
             }
@@ -105,20 +137,20 @@ public class AccPage extends AppCompatActivity implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.btnEditProfile) {
+        if (v == btnEditProfile) {
             startActivity(new Intent(this, EditProfileActivity.class));
-        } else if (v.getId() == R.id.btnChangePassword) {
+        } else if (v == btnChangePassword) {
             // TODO: Implement change password functionality
-            Toast.makeText(this, "Change Password - Coming soon!", Toast.LENGTH_SHORT).show();
-        } else if (v.getId() == R.id.btnLogout) {
-            logout();
+            Toast.makeText(this, "Change password functionality coming soon", Toast.LENGTH_SHORT).show();
+        } else if (v == btnLogout) {
+            authenticationService.signOut();
+            // Clear user data from SharedPreferences
+            SharedPreferencesUtil.signOutUser(this);
+            // Redirect to MainActivity
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
         }
-    }
-
-    private void logout() {
-        authenticationService.signOut();
-        SharedPreferencesUtil.signOutUser(this);
-        navigateToLogin();
     }
 
     private void navigateToLogin() {

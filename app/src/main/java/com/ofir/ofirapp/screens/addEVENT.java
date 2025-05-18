@@ -15,20 +15,19 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.ofir.ofirapp.R;
 import com.ofir.ofirapp.adapters.UserNamAdapter;
 import com.ofir.ofirapp.models.Event;
 import com.ofir.ofirapp.models.User;
-import com.ofir.ofirapp.services.DatabaseService;
 import com.ofir.ofirapp.services.AuthenticationService;
+import com.ofir.ofirapp.services.DatabaseService;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class addEVENT extends AppCompatActivity {
+public class addEVENT extends BaseActivity implements AdapterView.OnItemSelectedListener {
     // UI Components
     private CalendarView cvEventDate;
     private Spinner spinnerEventType;
@@ -45,6 +44,7 @@ public class addEVENT extends AppCompatActivity {
 
     // Data
     private DatabaseService databaseService;
+    private AuthenticationService authenticationService;
     private ArrayList<User> availableUsers;
     private ArrayList<User> selectedUsers;
     private String selectedEventType;
@@ -62,13 +62,30 @@ public class addEVENT extends AppCompatActivity {
         initializeViews();
         setupListeners();
         loadUsers();
+
+        databaseService = DatabaseService.getInstance();
+        authenticationService = AuthenticationService.getInstance();
+        setActionBarTitle("Add Event");
     }
 
     private void initializeData() {
-        databaseService = DatabaseService.getInstance();
         availableUsers = new ArrayList<>();
         selectedUsers = new ArrayList<>();
-        uid = AuthenticationService.getInstance().getCurrentUserId();
+        
+        // Initialize services early
+        try {
+            databaseService = DatabaseService.getInstance();
+            authenticationService = AuthenticationService.getInstance();
+            uid = authenticationService.getCurrentUserId();
+            if (uid == null) {
+                showError("Error: User not authenticated");
+                navigateToAfterLogPage();
+            }
+        } catch (Exception e) {
+            Log.e("TAG", "Failed to initialize services", e);
+            showError("Error initializing app services");
+            navigateToAfterLogPage();
+        }
     }
 
     private void initializeViews() {
@@ -170,29 +187,59 @@ public class addEVENT extends AppCompatActivity {
     }
 
     private void validateAndCreateEvent() {
+        Log.d("AddEvent", "Starting event validation");
         if (!validateInputs()) {
+            Log.d("AddEvent", "Basic input validation failed");
             return;
         }
 
-        selectedEventType = spinnerEventType.getSelectedItem().toString();
-        selectedFood = getSelectedFoodType();
+        try {
+            // Add null checks for spinner
+            if (spinnerEventType.getSelectedItem() == null) {
+                Log.d("AddEvent", "Event type spinner is null");
+                showError("Please select an event type");
+                return;
+            }
 
-        String eventId = databaseService.generateEventId();
-        Event newEvent = new Event(
-            eventId,
-            selectedEventType,
-            selectedDate,
-            etVenueName.getText().toString(),
-            etAddress.getText().toString(),
-            etCity.getText().toString(),
-            etDress.getText().toString(),
-            "new",
-            selectedFood,
-            uid,
-            selectedUsers
-        );
+            // Add null checks for database services
+            if (databaseService == null || authenticationService == null) {
+                Log.e("AddEvent", "Database services not initialized. DB: " + (databaseService == null) + ", Auth: " + (authenticationService == null));
+                showError("Error: Services not initialized properly");
+                return;
+            }
 
-        createEvent(newEvent);
+            selectedEventType = spinnerEventType.getSelectedItem().toString();
+            selectedFood = getSelectedFoodType();
+            Log.d("AddEvent", "Selected event type: " + selectedEventType + ", food: " + selectedFood);
+
+            // Validate that at least one member is selected
+            if (selectedUsers.isEmpty()) {
+                Log.d("AddEvent", "No members selected");
+                showError("Please select at least one member for the event");
+                return;
+            }
+
+            Log.d("AddEvent", "All validations passed, creating event");
+            String eventId = databaseService.generateEventId();
+            Event newEvent = new Event(
+                eventId,
+                selectedEventType,
+                selectedDate,
+                etVenueName.getText().toString(),
+                etAddress.getText().toString(),
+                etCity.getText().toString(),
+                etDress.getText().toString(),
+                "new",
+                selectedFood,
+                uid,
+                selectedUsers
+            );
+
+            createEvent(newEvent);
+        } catch (Exception e) {
+            Log.e("AddEvent", "Unexpected error during event creation", e);
+            showError("An unexpected error occurred. Please try again.");
+        }
     }
 
     private boolean validateInputs() {
@@ -313,6 +360,16 @@ public class addEVENT extends AppCompatActivity {
         Intent intent = new Intent(addEVENT.this, AfterLogPage.class);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        // Handle spinner selection if needed
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+        // Handle case when nothing is selected in spinner
     }
 }
 
