@@ -18,12 +18,14 @@ public class UserNamAdapter extends ArrayAdapter<User> {
     private final Context context;
     private final List<User> users;
     private final addEVENT activity;
+    private final boolean isSelectedList;
 
-    public UserNamAdapter(Context context, int resource, int textViewResourceId, List<User> users) {
+    public UserNamAdapter(Context context, int resource, int textViewResourceId, List<User> users, boolean isSelectedList) {
         super(context, resource, textViewResourceId, users);
         this.context = context;
         this.users = users;
         this.activity = (addEVENT) context;
+        this.isSelectedList = isSelectedList;
     }
 
     @Override
@@ -38,15 +40,25 @@ public class UserNamAdapter extends ArrayAdapter<User> {
         TextView textView = view.findViewById(android.R.id.text1);
         textView.setText(user.getFname() + " " + user.getLname());
 
-        // Check if user is already selected
-        if (activity.isUserAlreadySelected(user)) {
-            view.setBackgroundColor(Color.DKGRAY);
-            view.setAlpha(0.5f);
-            view.setEnabled(false);
-        } else {
+        if (isSelectedList) {
+            // In the selected list, show items normally
             view.setBackgroundColor(Color.TRANSPARENT);
+            textView.setTextColor(Color.BLACK);
             view.setAlpha(1.0f);
             view.setEnabled(true);
+        } else {
+            // In the available list, darken selected items
+            if (activity.isUserAlreadySelected(user)) {
+                view.setBackgroundColor(Color.DKGRAY);
+                textView.setTextColor(Color.WHITE);
+                view.setAlpha(0.7f);
+                view.setEnabled(false);
+            } else {
+                view.setBackgroundColor(Color.TRANSPARENT);
+                textView.setTextColor(Color.BLACK);
+                view.setAlpha(1.0f);
+                view.setEnabled(true);
+            }
         }
 
         return view;

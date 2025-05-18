@@ -107,8 +107,8 @@ public class addEVENT extends BaseActivity implements AdapterView.OnItemSelected
         lvSelectedMembers = findViewById(R.id.lvSelected);
 
         // Setup adapters
-        availableUsersAdapter = new UserNamAdapter(this, 0, 0, availableUsers);
-        selectedUsersAdapter = new UserNamAdapter(this, 0, 0, selectedUsers);
+        availableUsersAdapter = new UserNamAdapter(this, 0, 0, availableUsers, false);
+        selectedUsersAdapter = new UserNamAdapter(this, 0, 0, selectedUsers, true);
 
         lvMembers.setAdapter(availableUsersAdapter);
         lvSelectedMembers.setAdapter(selectedUsersAdapter);

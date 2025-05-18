@@ -252,37 +252,67 @@
                         android:weightSum="2"
                         android:layout_marginBottom="16dp">
 
-                        <androidx.core.widget.NestedScrollView
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:layout_marginEnd="8dp"
-                            android:background="#F5F5F5"
-                            android:fillViewport="true">
+                            android:orientation="vertical">
 
-                            <ListView
-                                android:id="@+id/lvMembers"
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Available Members"
+                                android:textColor="#1A237E"
+                                android:textSize="16sp"
+                                android:layout_marginBottom="8dp"/>
+
+                            <androidx.core.widget.NestedScrollView
                                 android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:nestedScrollingEnabled="true"/>
+                                android:layout_height="0dp"
+                                android:layout_weight="1"
+                                android:background="#F5F5F5"
+                                android:fillViewport="true">
 
-                        </androidx.core.widget.NestedScrollView>
+                                <ListView
+                                    android:id="@+id/lvMembers"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:nestedScrollingEnabled="true"/>
 
-                        <androidx.core.widget.NestedScrollView
+                            </androidx.core.widget.NestedScrollView>
+                        </LinearLayout>
+
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:layout_marginStart="8dp"
-                            android:background="#F5F5F5"
-                            android:fillViewport="true">
+                            android:orientation="vertical">
 
-                            <ListView
-                                android:id="@+id/lvSelected"
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Selected Members"
+                                android:textColor="#1A237E"
+                                android:textSize="16sp"
+                                android:layout_marginBottom="8dp"/>
+
+                            <androidx.core.widget.NestedScrollView
                                 android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:nestedScrollingEnabled="true"/>
+                                android:layout_height="0dp"
+                                android:layout_weight="1"
+                                android:background="#FFFFFF"
+                                android:fillViewport="true">
 
-                        </androidx.core.widget.NestedScrollView>
+                                <ListView
+                                    android:id="@+id/lvSelected"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:nestedScrollingEnabled="true"/>
+
+                            </androidx.core.widget.NestedScrollView>
+                        </LinearLayout>
                     </LinearLayout>
 
                     <!-- Save Button -->
