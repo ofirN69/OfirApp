@@ -52,7 +52,7 @@
                         android:id="@+id/tvDisplayName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Name"
+                        android:text="שם"
                         android:textColor="#1A237E"
                         android:textSize="24sp"
                         android:textStyle="bold"
@@ -81,7 +81,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Personal Information"
+                        android:text="מידע אישי"
                         android:textColor="#1A237E"
                         android:textSize="18sp"
                         android:textStyle="bold"
@@ -103,7 +103,7 @@
                             android:id="@+id/tvEmail"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Email"
+                            android:text="אימייל"
                             android:textSize="16sp"/>
                     </LinearLayout>
 
@@ -123,7 +123,7 @@
                             android:id="@+id/tvPhone"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Phone"
+                            android:text="טלפון"
                             android:textSize="16sp"/>
                     </LinearLayout>
 
@@ -170,7 +170,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="My Owned Events"
+                        android:text="My Personal Events"
                         android:textColor="#1A237E"
                         android:textSize="18sp"
                         android:textStyle="bold"
@@ -209,7 +209,7 @@
                         android:id="@+id/btnEditProfile"
                         android:layout_width="match_parent"
                         android:layout_height="60dp"
-                        android:text="Edit Profile"
+                        android:text="ערוך פרופיל"
                         android:textSize="16sp"
                         android:layout_marginBottom="8dp"
                         app:cornerRadius="12dp"
@@ -220,7 +220,7 @@
                         android:id="@+id/btnChangePassword"
                         android:layout_width="match_parent"
                         android:layout_height="60dp"
-                        android:text="Change Password"
+                        android:text="שנה סיסמה"
                         android:textSize="16sp"
                         android:layout_marginBottom="8dp"
                         app:cornerRadius="12dp"
@@ -231,7 +231,7 @@
                         android:id="@+id/btnLogout"
                         android:layout_width="match_parent"
                         android:layout_height="60dp"
-                        android:text="Logout"
+                        android:text="התנתק"
                         android:textSize="16sp"
                         app:cornerRadius="12dp"
                         android:backgroundTint="#F44336"

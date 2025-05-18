@@ -18,6 +18,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
     private MaterialButton btnCancel;
     
     private AuthenticationService authenticationService;
+    private DatabaseService databaseService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +27,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
         
         // Initialize services
         authenticationService = AuthenticationService.getInstance();
+        databaseService = DatabaseService.getInstance();
         
         // Initialize views
         initializeViews();
@@ -54,38 +56,60 @@ public class ChangePasswordActivity extends AppCompatActivity {
         
         // Validate inputs
         if (TextUtils.isEmpty(currentPassword)) {
-            etCurrentPassword.setError("Please enter current password");
+            etCurrentPassword.setError("אנא הכנס סיסמה נוכחית");
             return;
         }
         
         if (TextUtils.isEmpty(newPassword)) {
-            etNewPassword.setError("Please enter new password");
+            etNewPassword.setError("אנא הכנס סיסמה חדשה");
             return;
         }
         
         if (TextUtils.isEmpty(confirmPassword)) {
-            etConfirmPassword.setError("Please confirm new password");
+            etConfirmPassword.setError("אנא אשר סיסמה חדשה");
             return;
         }
         
         if (newPassword.length() < 6) {
-            etNewPassword.setError("Password must be at least 6 characters long");
+            etNewPassword.setError("הסיסמה חייבת להכיל לפחות 6 תווים");
             return;
         }
         
         if (!newPassword.equals(confirmPassword)) {
-            etConfirmPassword.setError("Passwords do not match");
+            etConfirmPassword.setError("הסיסמאות אינן תואמות");
             return;
         }
         
-        // Change password
+        // Change password in both Authentication and Database
+        String userId = authenticationService.getCurrentUserId();
+        if (userId == null) {
+            Toast.makeText(this, "שגיאה: משתמש לא מזוהה", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // First update in Authentication
         authenticationService.changePassword(currentPassword, newPassword, new AuthenticationService.AuthCallback() {
             @Override
             public void onSuccess() {
-                runOnUiThread(() -> {
-                    Toast.makeText(ChangePasswordActivity.this, 
-                        "Password changed successfully", Toast.LENGTH_SHORT).show();
-                    finish();
+                // After successful auth update, update in database
+                databaseService.updateUserPassword(userId, newPassword, new DatabaseService.DatabaseCallback<Void>() {
+                    @Override
+                    public void onCompleted(Void result) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(ChangePasswordActivity.this, 
+                                "הסיסמה שונתה בהצלחה", Toast.LENGTH_SHORT).show();
+                            finish();
+                        });
+                    }
+                    
+                    @Override
+                    public void onFailed(Exception e) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(ChangePasswordActivity.this, 
+                                "שגיאה בעדכון הסיסמה במסד הנתונים: " + e.getMessage(), 
+                                Toast.LENGTH_SHORT).show();
+                        });
+                    }
                 });
             }
             
@@ -93,7 +117,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
             public void onError(String error) {
                 runOnUiThread(() -> {
                     Toast.makeText(ChangePasswordActivity.this, 
-                        "Error: " + error, Toast.LENGTH_SHORT).show();
+                        "שגיאה: " + error, Toast.LENGTH_SHORT).show();
                 });
             }
         });

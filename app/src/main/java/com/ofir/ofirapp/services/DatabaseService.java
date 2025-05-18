@@ -336,7 +336,16 @@ public class DatabaseService {
         });
     }
 
-    public void updateUser(User user, DatabaseCallback<Void> callback) {
-        writeData("Users/" + user.getId(), user, callback);
+    public void updateUser(String userId, User user, DatabaseCallback<Void> callback) {
+        databaseReference.child("Users").child(userId).setValue(user)
+            .addOnSuccessListener(aVoid -> callback.onCompleted(null))
+            .addOnFailureListener(e -> callback.onFailed(e));
+    }
+
+    public void updateUserPassword(String userId, String newPassword, DatabaseCallback<Void> callback) {
+        // Update only the password field in the user's data
+        databaseReference.child("Users").child(userId).child("password").setValue(newPassword)
+            .addOnSuccessListener(aVoid -> callback.onCompleted(null))
+            .addOnFailureListener(e -> callback.onFailed(e));
     }
 }

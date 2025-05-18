@@ -34,9 +34,9 @@ public class AfterLogPage extends BaseActivity implements View.OnClickListener {
         User user=SharedPreferencesUtil.getUser(this);
 
         tvHello = findViewById(R.id.tv_hello);
-        tvHello.setText("Hello " + user.getFname() + " welcome to the app");
+        tvHello.setText("שלום " + user.getFname() + " ברוך הבא לאפליקציה");
         
-        setActionBarTitle("Home");
+        setActionBarTitle("דף הבית");
     }
 
     private void initviews() {

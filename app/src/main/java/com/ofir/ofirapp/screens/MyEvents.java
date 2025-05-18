@@ -70,7 +70,7 @@ public class MyEvents extends BaseActivity {
         // Load events
         loadEvents();
         
-        setActionBarTitle("My Events");
+        setActionBarTitle("האירועים שלי");
     }
 
     private void initializeServices() {
@@ -101,9 +101,9 @@ public class MyEvents extends BaseActivity {
         noCategoryText = findViewById(R.id.noCategoryText);
 
         // Set click listeners
-        todayEventsCard.setOnClickListener(v -> showCategoryEvents("Today's Events", allTodayEvents));
-        futureEventsCard.setOnClickListener(v -> showCategoryEvents("Future Events", allFutureEvents));
-        pastEventsCard.setOnClickListener(v -> showCategoryEvents("Past Events", allPastEvents));
+        todayEventsCard.setOnClickListener(v -> showCategoryEvents("אירועי היום", allTodayEvents));
+        futureEventsCard.setOnClickListener(v -> showCategoryEvents("אירועים עתידיים", allFutureEvents));
+        pastEventsCard.setOnClickListener(v -> showCategoryEvents("אירועים שעברו", allPastEvents));
         closeEventsButton.setOnClickListener(v -> hideEventsList());
     }
 
@@ -119,7 +119,7 @@ public class MyEvents extends BaseActivity {
             public void onCompleted(List<Event> events) {
                 runOnUiThread(() -> {
                     if (events == null) {
-                        Toast.makeText(MyEvents.this, "No events found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MyEvents.this, "לא נמצאו אירועים", Toast.LENGTH_SHORT).show();
                         updateEventCounts(0, 0, 0);
                         return;
                     }
@@ -217,18 +217,18 @@ public class MyEvents extends BaseActivity {
     }
 
     private void updateEventCounts(int todayCount, int futureCount, int pastCount) {
-        todayEventsCount.setText("Today's Events: " + todayCount);
-        futureEventsCount.setText("Future Events: " + futureCount);
-        pastEventsCount.setText("Past Events: " + pastCount);
+        todayEventsCount.setText("אירועי היום: " + todayCount);
+        futureEventsCount.setText("אירועים עתידיים: " + futureCount);
+        pastEventsCount.setText("אירועים שעברו: " + pastCount);
     }
 
     private void showCategoryEvents(String categoryTitle, List<Event> events) {
         if (events == null) {
-            Toast.makeText(this, "No events available", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "אין אירועים זמינים", Toast.LENGTH_SHORT).show();
             return;
         }
         
-        selectedCategoryTitle.setText(categoryTitle != null ? categoryTitle : "Events");
+        selectedCategoryTitle.setText(categoryTitle != null ? categoryTitle : "אירועים");
         eventAdapter.clearItems();
         eventAdapter.addEvents(events);
         eventsListCard.setVisibility(View.VISIBLE);

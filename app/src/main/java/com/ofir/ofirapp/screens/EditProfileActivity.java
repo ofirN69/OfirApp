@@ -141,7 +141,7 @@ public class EditProfileActivity extends AppCompatActivity {
         }
 
         // Save to Realtime Database
-        databaseService.updateUser(currentUser, new DatabaseService.DatabaseCallback<Void>() {
+        databaseService.updateUser(currentUser.getId(), currentUser, new DatabaseService.DatabaseCallback<Void>() {
             @Override
             public void onCompleted(Void object) {
                 runOnUiThread(() -> {

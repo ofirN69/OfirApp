@@ -55,7 +55,7 @@ public class AccPage extends BaseActivity implements View.OnClickListener {
         // Load user data
         loadUserData();
         
-        setActionBarTitle("My Account");
+        setActionBarTitle("החשבון שלי");
     }
 
     @Override
@@ -88,13 +88,13 @@ public class AccPage extends BaseActivity implements View.OnClickListener {
             // Display user information
             tvDisplayName.setText(currentUser.getFname());
             tvEmail.setText(currentUser.getEmail());
-            tvPhone.setText(currentUser.getPhone() != null ? currentUser.getPhone() : "No phone number");
+            tvPhone.setText(currentUser.getPhone() != null ? currentUser.getPhone() : "אין מספר טלפון");
 
             // Load user's events
             loadUserEvents();
         } else {
             // Handle case where user data is not available
-            Toast.makeText(this, "Failed to load user data", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "טעינת נתוני משתמש נכשלה", Toast.LENGTH_SHORT).show();
             navigateToLogin();
         }
     }
@@ -120,6 +120,7 @@ public class AccPage extends BaseActivity implements View.OnClickListener {
                     } else {
                         tvEventCount.setText("Events: 0");
                         ownedEventAdapter.clearItems();
+                        Toast.makeText(AccPage.this, "טעינת אירועים נכשלה", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -129,7 +130,7 @@ public class AccPage extends BaseActivity implements View.OnClickListener {
                 runOnUiThread(() -> {
                     tvEventCount.setText("Events: 0");
                     ownedEventAdapter.clearItems();
-                    Toast.makeText(AccPage.this, "Failed to load events", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(AccPage.this, "טעינת אירועים נכשלה", Toast.LENGTH_SHORT).show();
                 });
             }
         });

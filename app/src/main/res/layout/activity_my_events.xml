@@ -27,7 +27,7 @@
             android:drawableStart="@drawable/ic_event"
             android:drawablePadding="8dp"
             android:padding="16dp"
-            android:text="My Events"
+            android:text="האירועים שלי"
             android:textAlignment="center"
             android:textColor="#1A237E"
             android:textSize="24sp"
@@ -79,7 +79,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Today's Events"
+                        android:text="אירועי היום"
                         android:textSize="18sp"
                         android:textColor="#1B5E20"
                         android:textStyle="bold"
@@ -89,7 +89,7 @@
                         android:id="@+id/todayEventsCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Today's Events: 0"
+                        android:text="אירועי היום: 0"
                         android:textSize="14sp"
                         android:textColor="#4CAF50"
                         android:layout_marginTop="4dp"/>
@@ -125,7 +125,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Future Events"
+                        android:text="אירועים עתידיים"
                         android:textSize="18sp"
                         android:textColor="#0D47A1"
                         android:textStyle="bold"
@@ -135,7 +135,7 @@
                         android:id="@+id/futureEventsCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Future Events: 0"
+                        android:text="אירועים עתידיים: 0"
                         android:textSize="14sp"
                         android:textColor="#2196F3"
                         android:layout_marginTop="4dp"/>
@@ -180,7 +180,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Past Events"
+                        android:text="אירועים שעברו"
                         android:textSize="18sp"
                         android:textColor="#B71C1C"
                         android:textStyle="bold"
@@ -190,7 +190,7 @@
                         android:id="@+id/pastEventsCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Past Events: 0"
+                        android:text="אירועים שעברו: 0"
                         android:textSize="14sp"
                         android:textColor="#F44336"
                         android:layout_marginTop="4dp"/>
@@ -235,7 +235,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Category Events"
+                    android:text="קטגוריית אירועים"
                     android:textSize="20sp"
                     android:textColor="#1A237E"
                     android:textStyle="bold"/>
@@ -273,7 +273,7 @@
         android:id="@+id/noCategoryText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="No category selected"
+        android:text="לא נבחרה קטגוריה"
         android:textSize="16sp"
         android:textColor="#78909C"
         android:layout_marginBottom="24dp"

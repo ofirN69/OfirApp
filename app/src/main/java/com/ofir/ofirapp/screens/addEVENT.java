@@ -65,7 +65,7 @@ public class addEVENT extends BaseActivity implements AdapterView.OnItemSelected
 
         databaseService = DatabaseService.getInstance();
         authenticationService = AuthenticationService.getInstance();
-        setActionBarTitle("Add Event");
+        setActionBarTitle("הוספת אירוע");
     }
 
     private void initializeData() {
@@ -78,12 +78,12 @@ public class addEVENT extends BaseActivity implements AdapterView.OnItemSelected
             authenticationService = AuthenticationService.getInstance();
             uid = authenticationService.getCurrentUserId();
             if (uid == null) {
-                showError("Error: User not authenticated");
+                showError("שגיאה: משתמש לא אומת");
                 navigateToAfterLogPage();
             }
         } catch (Exception e) {
             Log.e("TAG", "Failed to initialize services", e);
-            showError("Error initializing app services");
+            showError("שגיאה בהתחלת שירותי האפליקציה");
             navigateToAfterLogPage();
         }
     }
@@ -107,8 +107,8 @@ public class addEVENT extends BaseActivity implements AdapterView.OnItemSelected
         lvSelectedMembers = findViewById(R.id.lvSelected);
 
         // Setup adapters
-        availableUsersAdapter = new UserNamAdapter(this, 0, 0, availableUsers);
-        selectedUsersAdapter = new UserNamAdapter(this, 0, 0, selectedUsers);
+        availableUsersAdapter = new UserNamAdapter(this, 0, 0, availableUsers, false);
+        selectedUsersAdapter = new UserNamAdapter(this, 0, 0, selectedUsers, true);
 
         lvMembers.setAdapter(availableUsersAdapter);
         lvSelectedMembers.setAdapter(selectedUsersAdapter);
@@ -203,14 +203,14 @@ public class addEVENT extends BaseActivity implements AdapterView.OnItemSelected
             // Add null checks for spinner
             if (spinnerEventType.getSelectedItem() == null) {
                 Log.d("AddEvent", "Event type spinner is null");
-                showError("Please select an event type");
+                showError("אנא בחר סוג אירוע");
                 return;
             }
 
             // Add null checks for database services
             if (databaseService == null || authenticationService == null) {
                 Log.e("AddEvent", "Database services not initialized. DB: " + (databaseService == null) + ", Auth: " + (authenticationService == null));
-                showError("Error: Services not initialized properly");
+                showError("שגיאה: השירותים לא אותחלו כראוי");
                 return;
             }
 
@@ -221,7 +221,7 @@ public class addEVENT extends BaseActivity implements AdapterView.OnItemSelected
             // Validate that at least one member is selected
             if (selectedUsers.isEmpty()) {
                 Log.d("AddEvent", "No members selected");
-                showError("Please select at least one member for the event");
+                showError("אנא בחר לפחות משתתף אחד לאירוע");
                 return;
             }
 
@@ -244,37 +244,37 @@ public class addEVENT extends BaseActivity implements AdapterView.OnItemSelected
             createEvent(newEvent);
         } catch (Exception e) {
             Log.e("AddEvent", "Unexpected error during event creation", e);
-            showError("An unexpected error occurred. Please try again.");
+            showError("אירעה שגיאה לא צפויה. אנא נסה שוב.");
         }
     }
 
     private boolean validateInputs() {
         if (TextUtils.isEmpty(etVenueName.getText())) {
-            showError("Please enter the venue name");
+            showError("אנא הכנס את שם המקום");
             return false;
         }
         if (TextUtils.isEmpty(etAddress.getText())) {
-            showError("Please enter the address");
+            showError("אנא הכנס כתובת");
             return false;
         }
         if (TextUtils.isEmpty(etCity.getText())) {
-            showError("Please enter the city");
+            showError("אנא הכנס עיר");
             return false;
         }
         if (TextUtils.isEmpty(etDress.getText())) {
-            showError("Please enter the dress code");
+            showError("אנא הכנס קוד לבוש");
             return false;
         }
         if (spinnerEventType.getSelectedItemPosition() == 0) {
-            showError("Please select a valid event type");
+            showError("אנא בחר סוג אירוע תקין");
             return false;
         }
         if (rgFood.getCheckedRadioButtonId() == -1) {
-            showError("Please select a food preference");
+            showError("אנא בחר העדפת מזון");
             return false;
         }
         if (TextUtils.isEmpty(selectedDate)) {
-            showError("Please select a date");
+            showError("אנא בחר תאריך");
             return false;
         }
 
@@ -288,12 +288,12 @@ public class addEVENT extends BaseActivity implements AdapterView.OnItemSelected
             currentDate = sdf.parse(sdf.format(currentDate));
             
             if (selectedEventDate.before(currentDate)) {
-                showError("Cannot create an event for a past date");
+                showError("לא ניתן ליצור אירוע בתאריך שעבר");
                 return false;
             }
         } catch (Exception e) {
             Log.e("TAG", "Date parsing error", e);
-            showError("Invalid date format");
+            showError("פורמט תאריך לא תקין");
             return false;
         }
 
@@ -302,10 +302,10 @@ public class addEVENT extends BaseActivity implements AdapterView.OnItemSelected
 
     private String getSelectedFoodType() {
         int selectedId = rgFood.getCheckedRadioButtonId();
-        if (selectedId == rbDairy.getId()) return "Dairy";
-        if (selectedId == rbVegetarian.getId()) return "Vegetarian";
-        if (selectedId == rbVegan.getId()) return "Vegan";
-        if (selectedId == rbMeat.getId()) return "Meat";
+        if (selectedId == rbDairy.getId()) return "חלבי";
+        if (selectedId == rbVegetarian.getId()) return "צמחוני";
+        if (selectedId == rbVegan.getId()) return "טבעוני";
+        if (selectedId == rbMeat.getId()) return "בשרי";
         return "";
     }
 
@@ -357,7 +357,7 @@ public class addEVENT extends BaseActivity implements AdapterView.OnItemSelected
             @Override
             public void onFailed(Exception e) {
                 Log.e("TAG", "Failed to create event: " + e.getMessage());
-                Toast.makeText(addEVENT.this, "Failed to create event", Toast.LENGTH_SHORT).show();
+                Toast.makeText(addEVENT.this, "נכשל ביצירת האירוע", Toast.LENGTH_SHORT).show();
             }
         });
     }
